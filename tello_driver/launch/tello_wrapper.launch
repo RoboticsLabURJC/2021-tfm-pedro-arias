@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+	<node name="tello_driver_node" pkg="tello_driver" type="tello_driver_node.py" output="screen"/>
+    <node pkg="drone_wrapper" type="drone_wrapper_node.py" name="drone_wrapper_node" output="screen"/>
+</launch>
