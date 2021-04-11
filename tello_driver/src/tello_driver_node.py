@@ -6,11 +6,22 @@ from mavros_msgs.srv import CommandTOL, SetMode, CommandBool, ParamGet, ParamSet
 from mavros_msgs.msg import State, ExtendedState, PositionTarget, ParamValue
 from sensor_msgs.msg import BatteryState, NavSatFix, Image, NavSatStatus
 from geometry_msgs.msg import PoseStamped, TwistStamped, Pose, Point, Quaternion, Twist, Vector3
+from math import degrees
 
 
 class TelloDriver(tellopy.Tello):
     def __init__(self):
         tellopy.Tello.__init__(self)
+
+        # TODO units
+        self.__x = 0  # cm
+        self.__y = 0  # cm
+        self.__h = 0  # m
+        self.__yaw = 0  # degrees
+        self.__vx = 0  # cm/s
+        self.__vy = 0  # cm/s
+        self.__vz = 0  # cm/s
+        self.__yaw_rate = 0  # degrees/s
 
         self.state_pub = rospy.Publisher('mavros/state', State, queue_size=10)
         self.ext_state_pub = rospy.Publisher('mavros/extended_state', ExtendedState, queue_size=10)
@@ -106,8 +117,58 @@ class TelloDriver(tellopy.Tello):
         # float32 yaw
         # float32 yaw_rate
 
-        rospy.loginfo(msg)
-        self.set_yaw(msg.yaw_rate)
+        mask = msg.type_mask
+        mask = "{0:b}".format(mask)
+        if bool(mask[-1]):
+            target_x = msg.position.x
+            x = target_x - self.__x
+            if x > 0:
+                self.forward(abs(int(x*100)))  # cm
+            elif x < 0:
+                self.back(abs(int(x*100)))  # cm
+            else:
+                pass  # already at target pos
+        elif bool(mask[-2]):
+            target_y = msg.position.y
+            y = target_y - self.__y
+            if y > 0:
+                self.right(abs(int(y*100)))  # cm
+            elif y < 0:
+                self.left(abs(int(y*100)))  # cm
+            else:
+                pass  # already at target pos
+        elif bool(mask[-3]):
+            target_z = msg.position.z
+            z = target_z - self.__h
+            if z > 0:
+                self.up(abs(int(z*100)))  # cm
+            elif z < 0:
+                self.down(abs(int(z*100)))  # cm
+            else:
+                pass  # already at target pos
+        elif bool(mask[-4]):
+            self.set_pitch(msg.velocity.x*100)  # linear x (cm/s)
+        elif bool(mask[-5]):
+            self.set_roll(msg.velocity.y*100)  # linear y (cm/s)
+        elif bool(mask[-6]):
+            self.set_throttle(msg.velocity.z*100)  # linear z (cm/s)
+        elif bool(mask[-7]):
+            pass  # AFX not supported
+        elif bool(mask[-8]):
+            pass  # AFY not supported
+        elif bool(mask[-9]):
+            pass  # AFZ not supported
+        elif bool(mask[-10]):
+            target_yaw = degrees(msg.yaw)
+            yaw = target_yaw - self.__yaw
+            if yaw > 0:
+                self.clockwise(abs(yaw))
+            elif yaw < 0:
+                self.counter_clockwise(abs(yaw))
+            else:
+                pass  # already at target yaw
+        elif bool(mask[-11]):
+            self.set_yaw(degrees(msg.yaw_rate))
 
     def handler(self, event, sender, data, **args):
         tello = sender
@@ -120,11 +181,12 @@ class TelloDriver(tellopy.Tello):
             is_flying = bool(data.em_sky)
             is_on_ground = bool(data.em_ground)
 
-            north_speed = float(data.north_speed)
-            east_speed = float(data.east_speed)
-            # vertical_speed = float(data.vertical_speed)
+            north_speed = float(data.north_speed)/10
+            east_speed = float(data.east_speed)/10
+            vertical_speed = -float(data.ground_speed)/10
 
-            height = float(data.height)
+            height = float(data.height)/100  # m
+            self.__h = height
 
             # print(data.em_sky, data.em_ground, data.em_open)
 
@@ -140,15 +202,16 @@ class TelloDriver(tellopy.Tello):
             ext_state = ExtendedState(vtol_state=0, landed_state=landed_state)
             self.ext_state_pub.publish(ext_state)
 
-            pose = PoseStamped(pose=Pose(position=Point(x=float('nan'), y=float('nan'), z=float('nan')),
+            pose = PoseStamped(pose=Pose(position=Point(x=float('nan'), y=float('nan'), z=height),
                                          orientation=Quaternion(x=float('nan'), y=float('nan'), z=float('nan'),
                                                                 w=float('nan'))))
             self.pose_pub.publish(pose)
 
-            twist = TwistStamped(twist=Twist(linear=Vector3(x=float('nan'), y=float('nan'), z=float('nan')),
+            twist = TwistStamped(twist=Twist(linear=Vector3(x=north_speed, y=east_speed, z=vertical_speed),
                                              angular=Vector3(x=float('nan'), y=float('nan'), z=float('nan'))))
             self.vel_body_pub.publish(twist)
 
+            # Empty, global pos not known
             nav_sat = NavSatFix(status=NavSatStatus(status=-1, service=0), latitude=float('nan'),
                                 longitude=float('nan'), altitude=float('nan'), position_covariance=[float('nan')]*9,
                                 position_covariance_type=0)
