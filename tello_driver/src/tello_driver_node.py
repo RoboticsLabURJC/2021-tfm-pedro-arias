@@ -32,7 +32,6 @@ class TelloDriver(tellopy.Tello):
         self.param_set_srv = rospy.Service('mavros/param/set', ParamSet, self.tello_param_set)
         self.param_get_srv = rospy.Service('mavros/param/get', ParamGet, self.tello_param_get)
 
-        # rospy.spin()
         rospy.on_shutdown(self.shutdown)
 
         try:
@@ -44,6 +43,14 @@ class TelloDriver(tellopy.Tello):
             print(ex)
 
     def tello_takeoff(self, req):
+        # float32 min_pitch  # used by takeoff
+        # float32 yaw
+        # float32 latitude
+        # float32 longitude
+        # float32 altitude
+        # ---
+        # bool success
+        # uint8 result
         self.takeoff()
         rospy.loginfo("Taking off!")
         return True, 0
@@ -53,7 +60,13 @@ class TelloDriver(tellopy.Tello):
         # ----
         # bool success
         # uint8 result
-        return False, 0
+        rospy.loginfo("Tello Arming")
+        if req.value:
+            tk_req = CommandTOL()
+            success, result = self.tello_takeoff(tk_req)  # arming is actually taking off in OFFBOARD flight mode
+            return success, result
+        else:
+            return False, 0
 
     def tello_set_mode(self, req):
         # uint8 base_mode
@@ -116,7 +129,9 @@ class TelloDriver(tellopy.Tello):
             # print(data.em_sky, data.em_ground, data.em_open)
 
             is_armed = True if is_flying else False
-            landed_state = 1 if is_on_ground else 2 if is_flying else 0
+            # landed_state = 1 if is_on_ground else 2 if is_flying else 0
+            # TODO: review why not on ground?
+            landed_state = 1 if is_on_ground else 2 if is_flying else 1
 
             state = State(connected=True, armed=is_armed, guided=False, manual_input=False, mode="OFFBOARD",
                           system_status=0)
