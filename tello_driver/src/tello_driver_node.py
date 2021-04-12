@@ -8,6 +8,10 @@ from sensor_msgs.msg import BatteryState, NavSatFix, Image, NavSatStatus
 from geometry_msgs.msg import PoseStamped, TwistStamped, Pose, Point, Quaternion, Twist, Vector3
 from math import degrees
 
+import sys
+import cv2
+import numpy
+
 
 class TelloDriver(tellopy.Tello):
     def __init__(self):
@@ -47,7 +51,9 @@ class TelloDriver(tellopy.Tello):
 
         try:
             self.connect()
+            self.start_video()
             self.subscribe(self.EVENT_FLIGHT_DATA, self.handler)
+            self.subscribe(self.EVENT_VIDEO_FRAME, self.video_handler)
             self.wait_for_connection(60.0)
         except Exception as ex:
             rospy.logerr(ex)
@@ -217,8 +223,6 @@ class TelloDriver(tellopy.Tello):
                                 position_covariance_type=0)
             self.global_pub.publish(nav_sat)
 
-            # IMG pub
-
             # bat = BatteryState(voltage=0.0, temperature=float('nan'), current=float('nan'), charge=float('nan'),
             #                    capacity=float('nan'), design_capacity=float('nan'), percentage=bat_percent,
             #                    power_supply_status=0, power_supply_health=0, power_supply_technology=0, present=True,
@@ -231,8 +235,38 @@ class TelloDriver(tellopy.Tello):
                                serial_number="")
             self.bat_status_pub.publish(bat)
 
-    def video_handler(self):
-        pass
+    def video_handler(self, event, sender, data, **args):
+        cap = cv2.VideoCapture(data)
+        fourcc = cv2.VideoWriter_fourcc('H', '2', '6', '4')
+
+        cap.set(6, fourcc)
+        cap.set(3, 1920)
+        cap.set(4, 1080)
+        cap.set(5, 30)
+
+        # vid = cv2.VideoWriter('../test.avi', fourcc, 20.0, (640, 480))
+        # print(vid.isOpened())  # returns false :(
+        while cap.isOpened():
+            print("bucle")
+            ret, frame = cap.read()
+            image = cv2.cvtColor(numpy.array(frame.to_image()), cv2.COLOR_RGB2BGR)
+            print(image)
+            cv2.imshow("Image", image)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+            # if ret:
+            #     # gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+            #     vid.write(frame)
+            #
+            #     cv2.imshow('window', frame)
+            #
+            #     if cv2.waitKey(1) & 0xFF == ord('q'):
+            #         break
+
+        cap.release()
+        # vid.release()
+        cv2.destroyWindow('window')
 
     def shutdown(self):
         self.quit()
