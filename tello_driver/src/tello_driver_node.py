@@ -22,9 +22,9 @@ class TelloDriver(tellopy.Tello):
         self.__y = 0  # cm
         self.__h = 0  # m
         self.__yaw = 0  # degrees
-        self.__vx = 0  # cm/s
-        self.__vy = 0  # cm/s
-        self.__vz = 0  # cm/s
+        self.__vx = 0  # m/s
+        self.__vy = 0  # m/s
+        self.__vz = 0  # m/s
         self.__yaw_rate = 0  # degrees/s
 
         self.state_pub = rospy.Publisher('mavros/state', State, queue_size=10)
@@ -184,14 +184,23 @@ class TelloDriver(tellopy.Tello):
             bat_percent = float("%2d" % data.battery_percentage)
             bat_state = bool(data.battery_state)
 
+            # print(bool(data.em_open))  # em_open ?
             is_flying = bool(data.em_sky)
             is_on_ground = bool(data.em_ground)
 
-            north_speed = float(data.north_speed)/10
-            east_speed = float(data.east_speed)/10
-            vertical_speed = -float(data.ground_speed)/10
+            north_speed = float(data.north_speed)/100  # m
+            east_speed = float(data.east_speed)/100  # m
+            vertical_speed = -float(data.ground_speed)/100  # m
 
             height = float(data.height)/100  # m
+
+            self.__vx = north_speed
+            self.__vy = east_speed
+            self.__vz = vertical_speed
+            # self.__x = self.right_y
+            # self.__y = self.right_x
+            # self.__z = self.left_y
+            # self.__yaw = self.left_x
             self.__h = height
 
             # print(data.em_sky, data.em_ground, data.em_open)
@@ -208,7 +217,8 @@ class TelloDriver(tellopy.Tello):
             ext_state = ExtendedState(vtol_state=0, landed_state=landed_state)
             self.ext_state_pub.publish(ext_state)
 
-            pose = PoseStamped(pose=Pose(position=Point(x=float('nan'), y=float('nan'), z=height),
+            # TODO update pos attributes
+            pose = PoseStamped(pose=Pose(position=Point(x=self.__x, y=self.__y, z=height),
                                          orientation=Quaternion(x=float('nan'), y=float('nan'), z=float('nan'),
                                                                 w=float('nan'))))
             self.pose_pub.publish(pose)
