@@ -45,6 +45,10 @@ def euler_to_q(euler):
     return q
 
 
+class TelloConnectionError(Exception):
+    pass
+
+
 # TODO: safety land each 15sec without cmd
 class TelloDriver:
     PUB_RATE = 0.1  # sec
@@ -99,25 +103,24 @@ class TelloDriver:
 
         rospy.on_shutdown(self.shutdown)
 
+        self.response_handler = threading.Thread(target=self.rcv_response)
+        self.data_handler = threading.Thread(target=self.rcv_data)
+        self.video_handler = threading.Thread(target=self.rcv_video)
+
         try:
             self.sock.bind(self.LOCAL_ADDRESS)
             self.state_sock.bind(self.STATE_ADDRESS)
 
-            self.response_handler = threading.Thread(target=self.rcv_response)
             self.response_handler.start()
 
             self.connect()
-
             self.set_stream(on=True)
 
-            self.data_handler = threading.Thread(target=self.rcv_data)
             self.data_handler.start()
-
-            self.video_handler = threading.Thread(target=self.rcv_video)
             self.video_handler.start()
         except Exception as ex:
             rospy.logerr(ex)
-            print(ex)
+            self.shutdown()
 
         rospy.Timer(rospy.Duration(self.PUB_RATE), self.send_data)
 
@@ -146,8 +149,7 @@ class TelloDriver:
             return True
         else:
             self.__running = False
-            # TODO raise exception
-            return False
+            raise TelloConnectionError("Connection failed. Tello not ready.")
 
     def set_stream(self, on=True):
         if on:
@@ -303,7 +305,8 @@ class TelloDriver:
 
                 # rospy.loginfo("Data {data} received from {address}".format(data=data, address=address))
             except Exception as e:
-                print(e)
+                if self.__running:
+                    print(e)
                 break
 
     def rcv_data(self):
@@ -451,11 +454,22 @@ class TelloDriver:
         if self.__is_stream:
             self.set_stream(on=False)
         self.__running = False
-        self.response_handler.join()
-        self.data_handler.join()
-        self.video_handler.join()
-        self.sock.close()
+        try:
+            # self.sock.close()
+            self.sock.shutdown(socket.SHUT_RDWR)
+        except Exception as e:
+            if e.errno == 107:
+                pass
+            else:
+                raise e
         self.state_sock.close()
+        if self.response_handler.is_alive():
+            self.response_handler.join()
+        if self.data_handler.is_alive():
+            self.data_handler.join()
+        if self.video_handler.is_alive():
+            self.video_handler.join()
+
         rospy.loginfo("Tello driver shutting down")
 
     def __del__(self):
