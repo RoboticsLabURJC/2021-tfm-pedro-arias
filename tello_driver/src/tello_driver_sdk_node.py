@@ -51,10 +51,11 @@ class TelloDriver:
     CMD_ADDRESS = ('192.168.10.1', 8889)
     STATE_ADDRESS = ('0.0.0.0', 8890)
     VIDEO_ADDRESS = ('0.0.0.0', 11111)
-    LOCAL_ADDRESS = ('', 9000)
+    LOCAL_ADDRESS = ('0.0.0.0', 9000)
 
     def __init__(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.state_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
         self.__state_dict = {}
         self.__running = True
@@ -98,7 +99,9 @@ class TelloDriver:
 
         try:
             self.sock.bind(self.LOCAL_ADDRESS)
-            print(self.connect())
+            self.state_sock.bind(self.STATE_ADDRESS)
+
+            self.connect()
 
             self.set_stream(on=True)
 
@@ -271,7 +274,7 @@ class TelloDriver:
     def rcv_data(self):
         while self.__running:
             try:
-                msg, _ = self.sock.recvfrom(1024)
+                msg, _ = self.state_sock.recvfrom(1024)
                 msg = msg.decode(encoding="utf-8")
                 state = msg.strip().split(";")
 
@@ -393,8 +396,7 @@ class TelloDriver:
         self.bat_status_pub.publish(bat)
 
     def rcv_video(self):
-        address = self.VIDEO_ADDRESS[0] + ":" + str(self.VIDEO_ADDRESS[1])
-        cap = cv2.VideoCapture("udp://@" + address)
+        cap = cv2.VideoCapture("udp://@{ip}:{port}".format(ip=self.VIDEO_ADDRESS[0], port=str(self.VIDEO_ADDRESS[1])))
 
         while self.__running:
             try:
