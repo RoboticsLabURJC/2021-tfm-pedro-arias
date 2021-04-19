@@ -190,6 +190,7 @@ class TelloDriver:
         if req.value:
             rospy.loginfo("Tello Arming")
             self.__is_armed = True
+            time.sleep(1)  # waits 1 sec
             tk_req = CommandTOL()
             success, result = self.tello_takeoff(tk_req)  # arming is actually taking off in OFFBOARD flight mode
             return success, result
@@ -342,7 +343,7 @@ class TelloDriver:
             rospy.logwarn("Battery state unknown.")
 
         try:
-            height = float(self.__state_dict["h"])
+            height = float(self.__state_dict["h"])/100  # m
         except KeyError:
             height = float('nan')
             rospy.logwarn("Height state unknown.")
