@@ -124,21 +124,22 @@ class TelloDriver:
 
         rospy.Timer(rospy.Duration(self.PUB_RATE), self.send_data)
 
-    def __send_cmd(self, cmd, timeout=RESP_TIMEOUT):
+    def __send_cmd(self, cmd, blocking=True, timeout=RESP_TIMEOUT):
         self.sock.sendto(cmd.encode(encoding="utf-8"), self.CMD_ADDRESS)
 
-        start_time = time.time()
-        while not self.__responses:
-            if time.time() - start_time > timeout:
-                rospy.logwarn("Command {cmd} did not receive a response.".format(cmd=cmd))
-                return False
-            time.sleep(0.1)  # waits a bit
+        if blocking:
+            start_time = time.time()
+            while not self.__responses:
+                if time.time() - start_time > timeout:
+                    rospy.logwarn("Command {cmd} did not receive a response.".format(cmd=cmd))
+                    return False
+                time.sleep(0.1)  # waits a bit
 
-        resp = str(self.__responses.pop(0))
-        if resp.lower() == "ok":
-            return True
-        else:
-            return False
+            resp = self.__responses.pop(0).decode("utf-8")
+            if resp.lower() == "ok":
+                return True
+            else:
+                return False
 
     def connect(self):
         if self.__send_cmd("command"):
@@ -247,27 +248,27 @@ class TelloDriver:
             target_x = msg.position.x
             x = target_x - self.__x
             if x > 0:
-                self.__send_cmd("forward {}".format(abs(int(x*100))))  # cm
+                self.__send_cmd("forward {}".format(abs(int(x*100))), False)  # cm
             elif x < 0:
-                self.__send_cmd("back {}".format(abs(int(x*100))))  # cm
+                self.__send_cmd("back {}".format(abs(int(x*100))), False)  # cm
             else:
                 pass  # already at target pos
         elif bool(mask[-2]):
             target_y = msg.position.y
             y = target_y - self.__y
             if y > 0:
-                self.__send_cmd("right {}".format(abs(int(y*100))))  # cm
+                self.__send_cmd("right {}".format(abs(int(y*100))), False)  # cm
             elif y < 0:
-                self.__send_cmd("left {}".format(abs(int(y*100))))  # cm
+                self.__send_cmd("left {}".format(abs(int(y*100))), False)  # cm
             else:
                 pass  # already at target pos
         elif bool(mask[-3]):
             target_z = msg.position.z
             z = target_z - self.__h
             if z > 0:
-                self.__send_cmd("up {}".format(abs(int(z*100))))  # cm
+                self.__send_cmd("up {}".format(abs(int(z*100))), False)  # cm
             elif z < 0:
-                self.__send_cmd("down {}".format(abs(int(z*100))))  # cm
+                self.__send_cmd("down {}".format(abs(int(z*100))), False)  # cm
             else:
                 pass  # already at target pos
         elif bool(mask[-4]):
@@ -286,9 +287,9 @@ class TelloDriver:
             target_yaw = degrees(msg.yaw)
             yaw = target_yaw - self.__yaw
             if yaw > 0:
-                self.__send_cmd("cw {}".format(abs(yaw)))  # degrees
+                self.__send_cmd("cw {}".format(abs(yaw)), False)  # degrees
             elif yaw < 0:
-                self.__send_cmd("ccw {}".format(abs(yaw)))  # degrees
+                self.__send_cmd("ccw {}".format(abs(yaw)), False)  # degrees
             else:
                 pass  # already at target yaw
         elif bool(mask[-11]):
