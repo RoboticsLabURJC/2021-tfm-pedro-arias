@@ -8,14 +8,45 @@ from geometry_msgs.msg import PoseStamped, TwistStamped, Pose, Point, Quaternion
 from cv_bridge import CvBridge
 from math import degrees
 
+import numpy as np
 import cv2
 
 import threading
 import socket
 
 
+RATE = 0.1  # sec
+
+
+def euler_to_q(euler):
+    """
+    Create q array from euler angles
+    :param euler: array [roll, pitch, yaw] in rad
+    :returns: array q which represents a quaternion [w, x, y, z]
+    """
+    assert (len(euler) == 3)
+    phi = euler[0]
+    theta = euler[1]
+    psi = euler[2]
+    c_phi_2 = np.cos(phi / 2)
+    s_phi_2 = np.sin(phi / 2)
+    c_theta_2 = np.cos(theta / 2)
+    s_theta_2 = np.sin(theta / 2)
+    c_psi_2 = np.cos(psi / 2)
+    s_psi_2 = np.sin(psi / 2)
+    q = np.zeros(4)
+    q[0] = (c_phi_2 * c_theta_2 * c_psi_2 +
+            s_phi_2 * s_theta_2 * s_psi_2)
+    q[1] = (s_phi_2 * c_theta_2 * c_psi_2 -
+            c_phi_2 * s_theta_2 * s_psi_2)
+    q[2] = (c_phi_2 * s_theta_2 * c_psi_2 +
+            s_phi_2 * c_theta_2 * s_psi_2)
+    q[3] = (c_phi_2 * c_theta_2 * s_psi_2 -
+            s_phi_2 * s_theta_2 * c_psi_2)
+    return q
+
+
 # TODO: safety land each 15sec without cmd
-# TODO: timer pubs
 class TelloDriver:
     CMD_ADDRESS = ('192.168.10.1', 8889)
     STATE_ADDRESS = ('0.0.0.0', 8890)
@@ -79,6 +110,8 @@ class TelloDriver:
         except Exception as ex:
             rospy.logerr(ex)
             print(ex)
+
+        rospy.Timer(rospy.Duration(RATE), self.send_data)
 
     def __send_cmd(self, cmd):
         sent = self.sock.sendto(cmd.encode(encoding="utf-8"), self.CMD_ADDRESS)
@@ -252,27 +285,74 @@ class TelloDriver:
 
                     self.__state_dict[key] = value
 
-                # print("states: {}".format(msg.decode(encoding="utf-8")))
+                # print("states: {}".format(msg))
             except Exception as err:
                 print(err)
 
-    def update_pubs(self):
-        bat_percent = self.__state_dict["bat"]
+    def send_data(self, event):
+        if not self.__running:
+            return
 
-        height = self.__state_dict["h"]
+        try:
+            bat_percent = int(self.__state_dict["bat"])
+        except KeyError:
+            bat_percent = float('nan')
+            rospy.logwarn("Battery state unknown.")
 
-        pitch = self.__state_dict["pitch"]
-        roll = self.__state_dict["roll"]
-        yaw = self.__state_dict["yaw"]
-        # TODO to quaternion
+        try:
+            height = float(self.__state_dict["h"])
+        except KeyError:
+            height = float('nan')
+            rospy.logwarn("Height state unknown.")
 
-        vx = self.__state_dict["vgx"]
-        vy = self.__state_dict["vgy"]
-        vz = self.__state_dict["vgz"]
+        try:
+            pitch = float(self.__state_dict["pitch"])
+        except KeyError:
+            pitch = float('nan')
+            rospy.logwarn("Pitch state unknown.")
+        try:
+            roll = float(self.__state_dict["roll"])
+        except KeyError:
+            roll = float('nan')
+            rospy.logwarn("Roll state unknown.")
+        try:
+            yaw = float(self.__state_dict["yaw"])
+        except KeyError:
+            yaw = float('nan')
+            rospy.logwarn("Yaw state unknown.")
+        q = euler_to_q([roll, pitch, yaw])
 
-        ax = self.__state_dict["agx"]
-        ay = self.__state_dict["agy"]
-        az = self.__state_dict["agz"]
+        try:
+            vx = float(self.__state_dict["vgx"])
+        except KeyError:
+            vx = float('nan')
+            rospy.logwarn("Vgx state unknown.")
+        try:
+            vy = float(self.__state_dict["vgy"])
+        except KeyError:
+            vy = float('nan')
+            rospy.logwarn("Vgy state unknown.")
+        try:
+            vz = float(self.__state_dict["vgz"])
+        except KeyError:
+            vz = float('nan')
+            rospy.logwarn("Vgz state unknown.")
+
+        try:
+            ax = float(self.__state_dict["agx"])
+        except KeyError:
+            ax = float('nan')
+            rospy.logwarn("Agx state unknown.")
+        try:
+            ay = float(self.__state_dict["agy"])
+        except KeyError:
+            ay = float('nan')
+            rospy.logwarn("Agy state unknown.")
+        try:
+            az = float(self.__state_dict["agz"])
+        except KeyError:
+            az = float('nan')
+            rospy.logwarn("Agz state unknown.")
 
         is_armed = self.__is_armed
         # landed_state = 1 if is_on_ground else 2 if is_flying else 0
@@ -286,8 +366,8 @@ class TelloDriver:
         self.ext_state_pub.publish(ext_state)
 
         pose = PoseStamped(pose=Pose(position=Point(x=float('nan'), y=float('nan'), z=height),
-                                     orientation=Quaternion(x=float('nan'), y=float('nan'), z=float('nan'),
-                                                            w=float('nan'))))
+                                     orientation=Quaternion(x=float(q[1]), y=float(q[2]), z=float(q[3]),
+                                                            w=float(q[0]))))
         self.pose_pub.publish(pose)
 
         twist = TwistStamped(twist=Twist(linear=Vector3(x=vx, y=vy, z=vz),
