@@ -13,14 +13,13 @@ import cv2
 
 import threading
 import socket
-
-
-RATE = 0.1  # sec
+import time
 
 
 def euler_to_q(euler):
     """
     Create q array from euler angles
+    source: pymavlink quaternion.py https://github.com/ArduPilot/pymavlink/blob/c6998854c2611e101ca6eb3b18df9e97e9e0de04/quaternion.py
     :param euler: array [roll, pitch, yaw] in rad
     :returns: array q which represents a quaternion [w, x, y, z]
     """
@@ -48,6 +47,8 @@ def euler_to_q(euler):
 
 # TODO: safety land each 15sec without cmd
 class TelloDriver:
+    PUB_RATE = 0.1  # sec
+    RESP_TIMEOUT = 7  # sec
     CMD_ADDRESS = ('192.168.10.1', 8889)
     STATE_ADDRESS = ('0.0.0.0', 8890)
     VIDEO_ADDRESS = ('0.0.0.0', 11111)
@@ -57,8 +58,9 @@ class TelloDriver:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.state_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
+        self.__responses = []
         self.__state_dict = {}
-        self.__running = True
+        self.__running = True  # started as True to recv responses and data
         self.__flight_mode = "MANUAL"  # app
         self.__is_armed = False  # TODO sobra? Si is_flying estoy armado
         self.__is_flying = False
@@ -101,6 +103,9 @@ class TelloDriver:
             self.sock.bind(self.LOCAL_ADDRESS)
             self.state_sock.bind(self.STATE_ADDRESS)
 
+            self.response_handler = threading.Thread(target=self.rcv_response)
+            self.response_handler.start()
+
             self.connect()
 
             self.set_stream(on=True)
@@ -114,29 +119,44 @@ class TelloDriver:
             rospy.logerr(ex)
             print(ex)
 
-        rospy.Timer(rospy.Duration(RATE), self.send_data)
+        rospy.Timer(rospy.Duration(self.PUB_RATE), self.send_data)
 
-    def __send_cmd(self, cmd):
-        sent = self.sock.sendto(cmd.encode(encoding="utf-8"), self.CMD_ADDRESS)
-        if sent == "ok":
+    def __send_cmd(self, cmd, timeout=RESP_TIMEOUT):
+        self.sock.sendto(cmd.encode(encoding="utf-8"), self.CMD_ADDRESS)
+
+        start_time = time.time()
+        while not self.__responses:
+            if time.time() - start_time > timeout:
+                rospy.logwarn("Command {cmd} did not receive a response.".format(cmd=cmd))
+                return False
+            time.sleep(0.1)  # waits a bit
+
+        resp = str(self.__responses.pop(0))
+        if resp.lower() == "ok":
             return True
         else:
             return False
 
     def connect(self):
         if self.__send_cmd("command"):
+            rospy.loginfo("Tello Connected")
+
+            self.__running = True
             self.__flight_mode = "OFFBOARD"
             return True
         else:
+            self.__running = False
             # TODO raise exception
             return False
 
     def set_stream(self, on=True):
         if on:
             if self.__send_cmd("streamon"):
+                rospy.loginfo("Tello Stream On")
                 self.__is_stream = True
         else:
             if self.__send_cmd("streamoff"):
+                rospy.loginfo("Tello Stream Off")
                 self.__is_stream = False
 
     def emergency_stop(self):
@@ -164,13 +184,14 @@ class TelloDriver:
         # ----
         # bool success
         # uint8 result
-        rospy.loginfo("Tello Arming")
         if req.value:
+            rospy.loginfo("Tello Arming")
             self.__is_armed = True
             tk_req = CommandTOL()
             success, result = self.tello_takeoff(tk_req)  # arming is actually taking off in OFFBOARD flight mode
             return success, result
         else:
+            rospy.loginfo("Tello Disarming")
             self.__is_armed = False
             return True, 0
 
@@ -270,6 +291,20 @@ class TelloDriver:
                 pass  # already at target yaw
         elif bool(mask[-11]):
             self.set_yaw(degrees(msg.yaw_rate))
+
+    def rcv_response(self):
+        while self.__running:
+            try:
+                data, address = self.sock.recvfrom(1024)
+
+                address = address[0]
+                if address == self.CMD_ADDRESS[0]:
+                    self.__responses.append(data)
+
+                # rospy.loginfo("Data {data} received from {address}".format(data=data, address=address))
+            except Exception as e:
+                print(e)
+                break
 
     def rcv_data(self):
         while self.__running:
@@ -416,9 +451,11 @@ class TelloDriver:
         if self.__is_stream:
             self.set_stream(on=False)
         self.__running = False
+        self.response_handler.join()
         self.data_handler.join()
         self.video_handler.join()
         self.sock.close()
+        self.state_sock.close()
         rospy.loginfo("Tello driver shutting down")
 
     def __del__(self):
