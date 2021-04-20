@@ -101,6 +101,8 @@ class TelloDriver:
         self.param_set_srv = rospy.Service('mavros/param/set', ParamSet, self.tello_param_set)
         self.param_get_srv = rospy.Service('mavros/param/get', ParamGet, self.tello_param_get)
 
+        self.emergency_srv = rospy.Service('tello/emergency', CommandBool, self.emergency_stop)
+
         rospy.on_shutdown(self.shutdown)
 
         self.response_handler = threading.Thread(target=self.rcv_response)
@@ -162,8 +164,11 @@ class TelloDriver:
                 rospy.loginfo("Tello Stream Off")
                 self.__is_stream = False
 
-    def emergency_stop(self):
-        self.__send_cmd("emergency")
+    def emergency_stop(self, req):
+        if req.value:
+            resp = self.__send_cmd("emergency")
+            return resp, 0
+        return False, 1
 
     def tello_takeoff(self, req):
         # float32 min_pitch  # used by takeoff
