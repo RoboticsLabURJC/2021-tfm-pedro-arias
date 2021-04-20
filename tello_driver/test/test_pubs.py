@@ -23,6 +23,7 @@ TEMP = "{}\n" \
        "#  MODE: {}       #\n" \
        "#  STATE: {}       #\n" \
        "#  BAT:   {:02d} %            #\n" \
+       "#  Z:     {} m            #\n" \
        "#                         #\n" \
        "###########################\n"
 
@@ -31,6 +32,7 @@ bat_percent = 0
 state = State()
 ext_state = 0
 pose = PoseStamped()
+h = 0
 vel = TwistStamped()
 glob = NavSatFix()
 
@@ -53,8 +55,9 @@ def ext_state_cb(msg):
 
 
 def pose_cb(msg):
-    global pose
+    global pose, h
     pose = msg
+    h = msg.pose.position.z
 
 
 def vel_cb(msg):
@@ -69,7 +72,7 @@ def global_cb(msg):
 
 def print_status():
     os.system('clear')  # Elegant-less
-    print(TEMP.format(CONT, state.mode, ext_state_codes[ext_state], bat_percent), end='\r')
+    print(TEMP.format(CONT, state.mode, ext_state_codes[ext_state], bat_percent, h), end='\r')
 
 
 def main():
