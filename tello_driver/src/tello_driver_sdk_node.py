@@ -10,6 +10,7 @@ from tf.transformations import quaternion_from_euler
 
 import cv2
 
+from math import degrees, radians
 import threading
 import socket
 import time
@@ -41,14 +42,14 @@ class TelloDriver:
         self.__is_stream = False
 
         # TODO units
-        self.__x = 0  # cm
-        self.__y = 0  # cm
-        self.__h = 0  # m
-        self.__yaw = 0  # degrees
-        self.__vx = 0  # cm/s
-        self.__vy = 0  # cm/s
-        self.__vz = 0  # cm/s
-        self.__yaw_rate = 0  # degrees/s
+        self.__x = 0.0  # cm
+        self.__y = 0.0  # cm
+        self.__h = 0.0  # m
+        self.__yaw = 0.0  # degrees
+        self.__vx = 0.0  # cm/s
+        self.__vy = 0.0  # cm/s
+        self.__vz = 0.0  # cm/s
+        self.__yaw_rate = 0.0  # degrees/s
 
         self.state_pub = rospy.Publisher('mavros/state', State, queue_size=10)
         self.ext_state_pub = rospy.Publisher('mavros/extended_state', ExtendedState, queue_size=10)
@@ -62,6 +63,9 @@ class TelloDriver:
         self.bat_status_pub = rospy.Publisher('mavros/battery', BatteryState, queue_size=10)  # EXTRA
 
         rospy.Subscriber('mavros/setpoint_raw/local', PositionTarget, self.setpoint_cb)
+        self.fake_vel_pub = rospy.Publisher('mavros/setpoint_raw/local', PositionTarget, queue_size=10)
+        self.fake_vel_timer = None  # Timer
+        self.fake_vel_status = False
 
         self.takeoff_srv = rospy.Service('mavros/cmd/takeoff', CommandTOL, self.tello_takeoff)  # EXTRA
 
@@ -112,6 +116,31 @@ class TelloDriver:
                 return True
             else:
                 return False
+
+    def __send_fake_vel(self, event):
+        vx = self.__vx
+        vy = self.__vy
+        vz = self.__vz
+        yaw_rate = radians(self.__yaw_rate)
+
+        mask = 3064 + 1 if vx == 0 else 0 + 2 if vy == 0 else 0 + 4 if vz == 0 else 0 + 1024 if yaw_rate == 0 else 0
+        if mask == 4095:
+            self.fake_vel_timer.shutdown()
+            self.fake_vel_status = False
+            return
+        setpoint = PositionTarget()
+        setpoint.coordinate_frame = 12
+        setpoint.type_mask = mask
+        setpoint.position.x = vx
+        setpoint.position.y = vy
+        setpoint.position.z = vz
+        setpoint.yaw = yaw_rate
+        self.fake_vel_pub.publish(setpoint)
+
+    def __hold_vel(self):
+        if not self.fake_vel_status:
+            self.fake_vel_timer = rospy.Timer(rospy.Duration(secs=1), self.__send_fake_vel)
+            self.fake_vel_status = True
 
     def connect(self):
         if self.__send_cmd("command"):
@@ -217,59 +246,142 @@ class TelloDriver:
         # float32 yaw
         # float32 yaw_rate
 
-        # TODO coordination frame
+        frame = msg.coordinate_frame
+        offset = False
+        if frame == 1:
+            # FRAME_LOCAL_NED = 1 --> Local coordinate frame, Z-down (x: North, y: East, z: Down).
+            rospy.logwarn("Compass data not known. Using FRD as NED frame.")
+            frame = 20
+            offset = False
+        elif frame == 7:
+            # FRAME_LOCAL_OFFSET_NED = 7 --> Offset to the current local frame.
+            # Anything expressed in this frame should be added to the current local frame position.
+            rospy.logwarn("Compass data not known. Using FRD as NED frame.")
+            frame = 20
+            offset = True
+        elif frame == 8:
+            # FRAME_BODY_NED = 8 --> DEPRECATED: MAV_FRAME_BODY_FRD: Body fixed frame of reference,
+            # Z-down (x: Forward, y: Right, z: Down).
+            rospy.logwarn("Coordination frame FRAME_BODY_NED deprecated. Using MAV_FRAME_BODY_FRD.")
+            frame = 12
+            offset = False
+        elif frame == 9:
+            # FRAME_BODY_OFFSET_NED = 9  --> DEPRECATED
+            rospy.logwarn("Coordination frame FRAME_BODY_NED deprecated. Using MAV_FRAME_BODY_FRD.")
+            frame = 12
+            offset = True
+        elif frame == 12:
+            # MAV_FRAME_BODY_FRD --> Body fixed frame of reference, Z-down (x: Forward, y: Right, z: Down).
+            pass
+        elif frame == 20:
+            # MAV_FRAME_LOCAL_FRD
+            pass
+        elif frame == 21:
+            # MAV_FRAME_LOCAL_FLU
+            pass
+        else:
+            rospy.logerr("Unknown Coordinate Frame. Setpoint skipped.")
+            return
+
+        is_abs = True if (frame == 20 or frame == 21) else False
+
         mask = msg.type_mask
-        mask = "{0:b}".format(mask)
-        if bool(mask[-1]):
-            target_x = msg.position.x
-            x = target_x - self.__x
-            if x > 0:
-                self.__send_cmd("forward {}".format(abs(int(x*100))), False)  # cm
-            elif x < 0:
-                self.__send_cmd("back {}".format(abs(int(x*100))), False)  # cm
+        mask = "{0:012b}".format(int(mask))
+        if not bool(int(mask[-1])):
+            print("x")
+        if not bool(int(mask[-2])):
+            print("y")
+        if not bool(int(mask[-3])):
+            print("z")
+        if not bool(int(mask[-4])):
+            print("vx")
+        if not bool(int(mask[-5])):
+            print("vy")
+        if not bool(int(mask[-6])):
+            print("vz")
+        if not bool(int(mask[-7])):
+            pass
+            rospy.logwarn("AFX target not supported.")
+        if not bool(int(mask[-8])):
+            pass
+            rospy.logwarn("AFY target not supported.")
+        if not bool(int(mask[-9])):
+            pass
+            rospy.logwarn("AFZ target not supported.")
+        if not bool(int(mask[-10])):
+            pass
+            rospy.logwarn("FORCE target not supported.")
+        if not bool(int(mask[-11])):
+            if is_abs:
+                target_yaw = degrees(msg.yaw)
+                yaw = target_yaw - self.__yaw
+                self.__yaw = target_yaw
             else:
-                pass  # already at target pos
-        elif bool(mask[-2]):
-            target_y = msg.position.y
-            y = target_y - self.__y
-            if y > 0:
-                self.__send_cmd("right {}".format(abs(int(y*100))), False)  # cm
-            elif y < 0:
-                self.__send_cmd("left {}".format(abs(int(y*100))), False)  # cm
-            else:
-                pass  # already at target pos
-        elif bool(mask[-3]):
-            target_z = msg.position.z
-            z = target_z - self.__h
-            if z > 0:
-                self.__send_cmd("up {}".format(abs(int(z*100))), False)  # cm
-            elif z < 0:
-                self.__send_cmd("down {}".format(abs(int(z*100))), False)  # cm
-            else:
-                pass  # already at target pos
-        elif bool(mask[-4]):
-            self.set_pitch(msg.velocity.x*100)  # linear x (cm/s)
-        elif bool(mask[-5]):
-            self.set_roll(msg.velocity.y*100)  # linear y (cm/s)
-        elif bool(mask[-6]):
-            self.set_throttle(msg.velocity.z*100)  # linear z (cm/s)
-        elif bool(mask[-7]):
-            pass  # AFX not supported
-        elif bool(mask[-8]):
-            pass  # AFY not supported
-        elif bool(mask[-9]):
-            pass  # AFZ not supported
-        elif bool(mask[-10]):
-            target_yaw = degrees(msg.yaw)
-            yaw = target_yaw - self.__yaw
+                target_yaw = degrees(msg.yaw)
+                yaw = target_yaw
+                self.__yaw += target_yaw
+
             if yaw > 0:
                 self.__send_cmd("cw {}".format(abs(yaw)), False)  # degrees
             elif yaw < 0:
                 self.__send_cmd("ccw {}".format(abs(yaw)), False)  # degrees
             else:
                 pass  # already at target yaw
-        elif bool(mask[-11]):
-            self.set_yaw(degrees(msg.yaw_rate))
+                # print("Already at target yaw")
+        if not bool(int(mask[-12])):
+            yaw_rate = degrees(msg.yaw_rate)
+            self.__yaw_rate = yaw_rate
+            self.__hold_vel()
+
+        # print(bool(mask[-3]), msg.position.z)
+        # if bool(mask[-1]):
+        #     target_x = msg.position.x
+        #     x = target_x - self.__x
+        #     if x > 0:
+        #         self.__send_cmd("forward {}".format(abs(int(x*100))), False)  # cm
+        #     elif x < 0:
+        #         self.__send_cmd("back {}".format(abs(int(x*100))), False)  # cm
+        #     else:
+        #         pass  # already at target pos
+        # elif bool(mask[-2]):
+        #     target_y = msg.position.y
+        #     y = target_y - self.__y
+        #     if y > 0:
+        #         self.__send_cmd("right {}".format(abs(int(y*100))), False)  # cm
+        #     elif y < 0:
+        #         self.__send_cmd("left {}".format(abs(int(y*100))), False)  # cm
+        #     else:
+        #         pass  # already at target pos
+        # elif bool(mask[-3]):
+        #     target_z = msg.position.z
+        #     z = target_z - self.__h
+        #     print(z)
+        #     if z > 0:
+        #         self.__send_cmd("up {}".format(abs(int(z*100))), False)  # cm
+        #     elif z < 0:
+        #         self.__send_cmd("down {}".format(abs(int(z*100))), False)  # cm
+        #     else:
+        #         pass  # already at target pos
+        # elif bool(mask[-4]):
+        #     self.set_pitch(msg.velocity.x*100)  # linear x (cm/s)
+        # elif bool(mask[-5]):
+        #     self.set_roll(msg.velocity.y*100)  # linear y (cm/s)
+        # elif bool(mask[-6]):
+        #     z = msg.velocity.z
+        #     print(z)
+        #     if z > 0:
+        #         self.__send_cmd("up {}".format(abs(int(z*100))), False)  # cm
+        #     elif z < 0:
+        #         self.__send_cmd("down {}".format(abs(int(z*100))), False)  # cm
+        #     else:
+        #         pass  # already at target pos
+        #     # self.set_throttle(msg.velocity.z*100)  # linear z (cm/s)
+
+        print(msg.header.seq)
+        print("pos", msg.position.x, msg.position.y, msg.position.z)
+        print("vel", msg.velocity.x, msg.velocity.y, msg.velocity.z)
+        print("yaw", msg.yaw)
+        print("yaw_rate", msg.yaw_rate)
 
     def rcv_response(self):
         while self.__running:
@@ -383,7 +495,7 @@ class TelloDriver:
         ext_state = ExtendedState(vtol_state=0, landed_state=landed_state)
         self.ext_state_pub.publish(ext_state)
 
-        pose = PoseStamped(pose=Pose(position=Point(x=float('nan'), y=float('nan'), z=height),
+        pose = PoseStamped(pose=Pose(position=Point(x=self.__x, y=self.__y, z=height),
                                      orientation=Quaternion(x=float(q[1]), y=float(q[2]), z=float(q[3]),
                                                             w=float(q[0]))))
         self.pose_pub.publish(pose)
