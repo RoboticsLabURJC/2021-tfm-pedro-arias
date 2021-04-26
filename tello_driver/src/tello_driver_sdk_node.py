@@ -6,43 +6,13 @@ from mavros_msgs.msg import State, ExtendedState, PositionTarget, ParamValue
 from sensor_msgs.msg import BatteryState, NavSatFix, Image, NavSatStatus
 from geometry_msgs.msg import PoseStamped, TwistStamped, Pose, Point, Quaternion, Twist, Vector3
 from cv_bridge import CvBridge
-from math import degrees
+from tf.transformations import quaternion_from_euler
 
-import numpy as np
 import cv2
 
 import threading
 import socket
 import time
-
-
-def euler_to_q(euler):
-    """
-    Create q array from euler angles
-    source: pymavlink quaternion.py https://github.com/ArduPilot/pymavlink/blob/c6998854c2611e101ca6eb3b18df9e97e9e0de04/quaternion.py
-    :param euler: array [roll, pitch, yaw] in rad
-    :returns: array q which represents a quaternion [w, x, y, z]
-    """
-    assert (len(euler) == 3)
-    phi = euler[0]
-    theta = euler[1]
-    psi = euler[2]
-    c_phi_2 = np.cos(phi / 2)
-    s_phi_2 = np.sin(phi / 2)
-    c_theta_2 = np.cos(theta / 2)
-    s_theta_2 = np.sin(theta / 2)
-    c_psi_2 = np.cos(psi / 2)
-    s_psi_2 = np.sin(psi / 2)
-    q = np.zeros(4)
-    q[0] = (c_phi_2 * c_theta_2 * c_psi_2 +
-            s_phi_2 * s_theta_2 * s_psi_2)
-    q[1] = (s_phi_2 * c_theta_2 * c_psi_2 -
-            c_phi_2 * s_theta_2 * s_psi_2)
-    q[2] = (c_phi_2 * s_theta_2 * c_psi_2 +
-            s_phi_2 * c_theta_2 * s_psi_2)
-    q[3] = (c_phi_2 * c_theta_2 * s_psi_2 -
-            s_phi_2 * s_theta_2 * c_psi_2)
-    return q
 
 
 class TelloConnectionError(Exception):
@@ -368,7 +338,7 @@ class TelloDriver:
         except KeyError:
             yaw = float('nan')
             rospy.logwarn("Yaw state unknown.")
-        q = euler_to_q([roll, pitch, yaw])
+        q = quaternion_from_euler(roll, pitch, yaw)
 
         try:
             vx = float(self.__state_dict["vgx"])
@@ -442,7 +412,6 @@ class TelloDriver:
 
     def rcv_video(self):
         cap = cv2.VideoCapture("udp://@{ip}:{port}".format(ip=self.VIDEO_ADDRESS[0], port=str(self.VIDEO_ADDRESS[1])))
-
         while self.__running:
             try:
                 ret, frame = cap.read()
