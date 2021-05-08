@@ -20,6 +20,7 @@ class TelloConnectionError(Exception):
     pass
 
 
+# TODO: x and y poses dont update during velocity control
 class TelloDriver:
     STILL_ALIVE_RATE = 10  # sec
     PUB_RATE = 100000000  # nsec --> 0.1 secs
