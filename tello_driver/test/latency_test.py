@@ -31,45 +31,56 @@ print("Taking off!", resp)
 
 time.sleep(5)
 
-# msg = PositionTarget()
-# msg.coordinate_frame = 8
-# msg.type_mask = 3064  # xyz yaw
-#
-# msg.position.x = 0
-# msg.position.y = 0
-# msg.position.z = 0
-# msg.yaw = 2
-#
-# print("Going to", msg.yaw_rate)
-# setpoint_raw_publisher.publish(msg)
-# time.sleep(10)
-
-
 msg = PositionTarget()
-msg.coordinate_frame = 12
-msg.type_mask = 0  # xyz yaw
+msg.coordinate_frame = 8
+msg.type_mask = 3064  # xyz yaw
 
 msg.position.x = 0
 msg.position.y = 0
 msg.position.z = 0
-msg.yaw_rate = 1
+msg.yaw = 0.1
 
-print("Going to", msg.yaw_rate)
-setpoint_raw_publisher.publish(msg)
-time.sleep(10)
+for i in range(1000):
+    # print("Going to", msg.yaw)
+    setpoint_raw_publisher.publish(msg)
+    time.sleep(0.01)
+time.sleep(1)
+
+for i in range(100):
+    # print("Going to", msg.yaw)
+    setpoint_raw_publisher.publish(msg)
+    time.sleep(0.1)
+time.sleep(1)
+
+for i in range(10):
+    # print("Going to", msg.yaw)
+    setpoint_raw_publisher.publish(msg)
+    time.sleep(1)
+time.sleep(1)
 
 msg = PositionTarget()
-msg.coordinate_frame = 12
-msg.type_mask = 0  # xyz yaw
+msg.coordinate_frame = 8
+msg.type_mask = 3064  # xyz yaw
 
 msg.position.x = 0
 msg.position.y = 0
 msg.position.z = 0
-msg.yaw_rate = -1
+msg.yaw = 2
 
-print("Going to", msg.yaw_rate)
-setpoint_raw_publisher.publish(msg)
-time.sleep(10)
+for i in range(1000):
+    setpoint_raw_publisher.publish(msg)
+    time.sleep(0.01)
+time.sleep(1)
+
+for i in range(100):
+    setpoint_raw_publisher.publish(msg)
+    time.sleep(0.1)
+time.sleep(1)
+
+for i in range(10):
+    setpoint_raw_publisher.publish(msg)
+    time.sleep(1)
+time.sleep(1)
 
 resp = land_srv(0.0, 0.0, 0.0, 0.0, 0.0)
 print("Landing!", resp)
