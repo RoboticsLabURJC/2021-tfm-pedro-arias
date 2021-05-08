@@ -124,31 +124,6 @@ class TelloDriver:
             else:
                 return False
 
-    def __send_fake_vel(self, event):
-        vx = self.__vx
-        vy = self.__vy
-        vz = self.__vz
-        yaw_rate = radians(self.__yaw_rate)
-
-        mask = 3064 + 1 if vx == 0 else 0 + 2 if vy == 0 else 0 + 4 if vz == 0 else 0 + 1024 if yaw_rate == 0 else 0
-        if mask == 4095:
-            self.fake_vel_timer.shutdown()
-            self.fake_vel_status = False
-            return
-        setpoint = PositionTarget()
-        setpoint.coordinate_frame = 12
-        setpoint.type_mask = mask
-        setpoint.position.x = vx
-        setpoint.position.y = vy
-        setpoint.position.z = vz
-        setpoint.yaw = yaw_rate
-        self.fake_vel_pub.publish(setpoint)
-
-    def __hold_vel(self):
-        if not self.fake_vel_status:
-            self.fake_vel_timer = rospy.Timer(rospy.Duration(secs=1), self.__send_fake_vel)
-            self.fake_vel_status = True
-
     def connect(self):
         if self.__send_cmd("command"):
             rospy.loginfo("Tello Connected")
@@ -254,7 +229,7 @@ class TelloDriver:
         # float32 yaw_rate
 
         frame = msg.coordinate_frame
-        offset = False
+        offset = False  # TODO, offset not used
         if frame == 1:
             # FRAME_LOCAL_NED = 1 --> Local coordinate frame, Z-down (x: North, y: East, z: Down).
             rospy.logwarn("Compass data not known. Using FRD as NED frame.")
@@ -291,21 +266,71 @@ class TelloDriver:
             return
 
         is_abs = True if (frame == 20 or frame == 21) else False
+        is_frd = True if (frame == 12 or frame == 20) else False
 
         mask = msg.type_mask
         mask = "{0:012b}".format(int(mask))
         if not bool(int(mask[-1])):
-            print("x")
+            target_x = msg.position.x*100  # cm
+            if is_abs:
+                x = target_x - self.__x
+                self.__x = target_x
+            else:
+                x = target_x
+                self.__x += target_x
+
+            if x > 0:
+                self.__send_cmd("forward {}".format(abs(x)), False)  # cm
+            elif x < 0:
+                self.__send_cmd("back {}".format(abs(x)), False)  # cm
+            else:
+                pass  # already at target x
+                # print("Already at target x")
         if not bool(int(mask[-2])):
-            print("y")
+            target_y = msg.position.y*100  # cm
+            if is_abs:
+                y = target_y - self.__y
+                self.__y = target_y
+            else:
+                y = target_y
+                self.__y += target_y
+
+            cmd_right = "right" if is_frd else "left"
+            cmd_left = "left" if is_frd else "right"
+            if y > 0:
+                self.__send_cmd(cmd_right + " {}".format(abs(y)), False)  # cm
+            elif y < 0:
+                self.__send_cmd(cmd_left + " {}".format(abs(y)), False)  # cm
+            else:
+                pass  # already at target y
+                # print("Already at target y")
         if not bool(int(mask[-3])):
-            print("z")
+            target_z = msg.position.z*100  # cm
+            if is_abs:
+                z = target_z - self.__h
+                self.__h = target_z
+            else:
+                z = target_z
+                self.__h += target_z
+
+            cmd_down = "down" if is_frd else "up"
+            cmd_up = "up" if is_frd else "down"
+            if z > 0:
+                self.__send_cmd(cmd_down + " {}".format(abs(z)), False)  # cm
+            elif z < 0:
+                self.__send_cmd(cmd_up + " {}".format(abs(z)), False)  # cm
+            else:
+                pass  # already at target z
+                # print("Already at target z")
         if not bool(int(mask[-4])):
-            print("vx")
+            vx = msg.velocity.x*100  # cm/s
+            self.__vx = vx
         if not bool(int(mask[-5])):
-            print("vy")
+            vy = msg.velocity.y*100  # cm/s
+            self.__vy = vy
         if not bool(int(mask[-6])):
-            print("vz")
+            vz = msg.velocity.z*100  # cm/s
+            self.__vz = vz
         if not bool(int(mask[-7])):
             pass
             rospy.logwarn("AFX target not supported.")
@@ -319,12 +344,11 @@ class TelloDriver:
             pass
             rospy.logwarn("FORCE target not supported.")
         if not bool(int(mask[-11])):
+            target_yaw = degrees(msg.yaw)
             if is_abs:
-                target_yaw = degrees(msg.yaw)
                 yaw = target_yaw - self.__yaw
                 self.__yaw = target_yaw
             else:
-                target_yaw = degrees(msg.yaw)
                 yaw = target_yaw
                 self.__yaw += target_yaw
 
@@ -336,53 +360,10 @@ class TelloDriver:
                 pass  # already at target yaw
                 # print("Already at target yaw")
         if not bool(int(mask[-12])):
-            yaw_rate = degrees(msg.yaw_rate)
+            yaw_rate = degrees(msg.yaw_rate)  # degrees/s
             self.__yaw_rate = yaw_rate
-            self.__hold_vel()
 
-        # print(bool(mask[-3]), msg.position.z)
-        # if bool(mask[-1]):
-        #     target_x = msg.position.x
-        #     x = target_x - self.__x
-        #     if x > 0:
-        #         self.__send_cmd("forward {}".format(abs(int(x*100))), False)  # cm
-        #     elif x < 0:
-        #         self.__send_cmd("back {}".format(abs(int(x*100))), False)  # cm
-        #     else:
-        #         pass  # already at target pos
-        # elif bool(mask[-2]):
-        #     target_y = msg.position.y
-        #     y = target_y - self.__y
-        #     if y > 0:
-        #         self.__send_cmd("right {}".format(abs(int(y*100))), False)  # cm
-        #     elif y < 0:
-        #         self.__send_cmd("left {}".format(abs(int(y*100))), False)  # cm
-        #     else:
-        #         pass  # already at target pos
-        # elif bool(mask[-3]):
-        #     target_z = msg.position.z
-        #     z = target_z - self.__h
-        #     print(z)
-        #     if z > 0:
-        #         self.__send_cmd("up {}".format(abs(int(z*100))), False)  # cm
-        #     elif z < 0:
-        #         self.__send_cmd("down {}".format(abs(int(z*100))), False)  # cm
-        #     else:
-        #         pass  # already at target pos
-        # elif bool(mask[-4]):
-        #     self.set_pitch(msg.velocity.x*100)  # linear x (cm/s)
-        # elif bool(mask[-5]):
-        #     self.set_roll(msg.velocity.y*100)  # linear y (cm/s)
-        # elif bool(mask[-6]):
-        #     z = msg.velocity.z
-        #     print(z)
-        #     if z > 0:
-        #         self.__send_cmd("up {}".format(abs(int(z*100))), False)  # cm
-        #     elif z < 0:
-        #         self.__send_cmd("down {}".format(abs(int(z*100))), False)  # cm
-        #     else:
-        #         pass  # already at target pos
-        #     # self.set_throttle(msg.velocity.z*100)  # linear z (cm/s)
+        self.__send_cmd("rc {} {} {} {}".format(self.__vx, self.__vy, self.__vz, self.__yaw_rate))
 
         print(msg.header.seq)
         print("pos", msg.position.x, msg.position.y, msg.position.z)
@@ -438,6 +419,7 @@ class TelloDriver:
 
         try:
             height = float(self.__state_dict["h"])/100  # m
+            self.__h = height*100  # cm
         except KeyError:
             height = float('nan')
             rospy.logwarn("Height state unknown.")
@@ -454,6 +436,7 @@ class TelloDriver:
             rospy.logwarn("Roll state unknown.")
         try:
             yaw = float(self.__state_dict["yaw"])
+            self.__yaw = yaw  # degrees
         except KeyError:
             yaw = float('nan')
             rospy.logwarn("Yaw state unknown.")
@@ -517,11 +500,6 @@ class TelloDriver:
                             position_covariance_type=0)
         self.global_pub.publish(nav_sat)
 
-        # bat = BatteryState(voltage=0.0, temperature=float('nan'), current=float('nan'), charge=float('nan'),
-        #                    capacity=float('nan'), design_capacity=float('nan'), percentage=bat_percent,
-        #                    power_supply_status=0, power_supply_health=0, power_supply_technology=0, present=True,
-        #                    cell_voltage=[float('nan')], cell_temperature=[float('nan')], location="0",
-        #                    serial_number="")
         bat = BatteryState(voltage=0.0, current=float('nan'), charge=float('nan'),
                            capacity=float('nan'), design_capacity=float('nan'), percentage=bat_percent,
                            power_supply_status=0, power_supply_health=0, power_supply_technology=0, present=True,
