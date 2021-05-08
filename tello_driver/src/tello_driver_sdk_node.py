@@ -10,7 +10,7 @@ from tf.transformations import quaternion_from_euler
 
 import cv2
 
-from math import degrees, radians
+from math import degrees
 import threading
 import socket
 import time
@@ -20,31 +20,32 @@ class TelloConnectionError(Exception):
     pass
 
 
-# TODO: safety land each 15sec without cmd
 class TelloDriver:
-    PUB_RATE = 0.1  # sec
+    STILL_ALIVE_RATE = 10  # sec
+    PUB_RATE = 100000000  # nsec --> 0.1 secs
     RESP_TIMEOUT = 7  # sec
     CMD_ADDRESS = ('192.168.10.1', 8889)
     STATE_ADDRESS = ('0.0.0.0', 8890)
     VIDEO_ADDRESS = ('0.0.0.0', 11111)
     LOCAL_ADDRESS = ('0.0.0.0', 9000)
 
-    def __init__(self):
+    def __init__(self, emergency_disabled=False):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.state_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+        self.__emergency_disabled = emergency_disabled
 
         self.__responses = []
         self.__state_dict = {}
         self.__running = True  # started as True to recv responses and data
         self.__flight_mode = "MANUAL"  # app
-        self.__is_armed = False  # TODO sobra? Si is_flying estoy armado
+        self.__is_armed = False
         self.__is_flying = False
         self.__is_stream = False
 
-        # TODO units
         self.__x = 0.0  # cm
         self.__y = 0.0  # cm
-        self.__h = 0.0  # m
+        self.__h = 0.0  # cm
         self.__yaw = 0.0  # degrees
         self.__vx = 0.0  # cm/s
         self.__vy = 0.0  # cm/s
@@ -98,9 +99,15 @@ class TelloDriver:
             rospy.logerr(ex)
             self.shutdown()
 
-        rospy.Timer(rospy.Duration(self.PUB_RATE), self.send_data)
+        rospy.Timer(rospy.Duration(nsecs=self.PUB_RATE), self.send_data)
+        if emergency_disabled:
+            rospy.Timer(rospy.Duration(secs=self.STILL_ALIVE_RATE), self.__still_alive)
+
+    def __still_alive(self, event):
+        self.__send_cmd("battery?")
 
     def __send_cmd(self, cmd, blocking=True, timeout=RESP_TIMEOUT):
+        print("Sending... {}".format(cmd))
         self.sock.sendto(cmd.encode(encoding="utf-8"), self.CMD_ADDRESS)
 
         if blocking:
