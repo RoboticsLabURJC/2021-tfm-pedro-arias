@@ -65,9 +65,6 @@ class TelloDriver:
         self.bat_status_pub = rospy.Publisher('mavros/battery', BatteryState, queue_size=10)  # EXTRA
 
         rospy.Subscriber('mavros/setpoint_raw/local', PositionTarget, self.setpoint_cb)
-        self.fake_vel_pub = rospy.Publisher('mavros/setpoint_raw/local', PositionTarget, queue_size=10)
-        self.fake_vel_timer = None  # Timer
-        self.fake_vel_status = False
 
         self.takeoff_srv = rospy.Service('mavros/cmd/takeoff', CommandTOL, self.tello_takeoff)  # EXTRA
 
@@ -364,7 +361,7 @@ class TelloDriver:
             yaw_rate = degrees(msg.yaw_rate)  # degrees/s
             self.__yaw_rate = yaw_rate
 
-        self.__send_cmd("rc {} {} {} {}".format(self.__vx, self.__vy, self.__vz, self.__yaw_rate))
+        self.__send_cmd("rc {} {} {} {}".format(self.__vx, self.__vy, self.__vz, self.__yaw_rate), blocking=False)
 
         print(msg.header.seq)
         print("pos", msg.position.x, msg.position.y, msg.position.z)
