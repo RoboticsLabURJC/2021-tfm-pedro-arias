@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>victure_driver</name>
+  <version>0.0.0</version>
+  <description>ROS driver to work with victure cameras</description>
+
+  <maintainer email="parias@todo.todo">Pedro Arias</maintainer>
+
+  <license>MIT</license>
+
+  <author>Pedro Arias</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>cv_bridge</depend>
+  <depend>rospy</depend>
+  <depend>sensor_msgs</depend>
+
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>

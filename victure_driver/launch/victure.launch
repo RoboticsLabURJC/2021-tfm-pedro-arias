@@ -1,0 +1,4 @@
+<launch>
+	<node pkg="victure_driver" type="video_bridge.py" name="victure_cam" output="screen"/>
+	<node pkg="victure_driver" type="test_video_bridge.py" name="test_victure_cam" output="screen"/>
+</launch>
