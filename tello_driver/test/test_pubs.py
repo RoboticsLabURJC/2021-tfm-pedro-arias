@@ -27,7 +27,6 @@ TEMP = "{}\n" \
        "#                         #\n" \
        "###########################\n"
 
-# TODO: global vars should use locks to avoid race conditions
 bat_percent = 0
 state = State()
 ext_state = 0
