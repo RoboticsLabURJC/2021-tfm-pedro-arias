@@ -1,9 +1,9 @@
 import numpy as np
 import cv2
-import yolov4
+import yolo_utils
 
-dw = yolov4.DarknetWrapper(config="data/yolov4-tiny.cfg", data="data/coco.data", weights="data/yolov4-tiny.weights")
-# dw = yolov4.DarknetWrapper()
+yolo4_tiny = yolo_utils.YOLOv4Tiny()
+# yolo4 = yolo_utils.DarknetWrapper()
 
 cap = cv2.VideoCapture("/dev/video0") # check this
 while(True):
@@ -14,7 +14,7 @@ while(True):
     frame = cv2.flip(frame, 0)
 
     # Our operations on the frame come here
-    dw.detect_frame(frame)
+    yolo4_tiny.detect_frame(frame)
 
     # Display the resulting frame
     cv2.imshow('frame', frame)

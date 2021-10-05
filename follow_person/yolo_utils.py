@@ -7,11 +7,7 @@ import darknet
 
 
 class DarknetWrapper:
-    CONFIG_FILE = "data/yolov4.cfg"
-    DATA_FILE = "data/coco.data"
-    WEIGHTS_FILE = "data/yolov4.weights"
-
-    def __init__(self, config=CONFIG_FILE, data=DATA_FILE, weights=WEIGHTS_FILE):
+    def __init__(self, config, data, weights):
         self.network, self.class_names, self.class_colors = darknet.load_network(config, data, weights)
 
         self.width = darknet.network_width(self.network)
@@ -66,6 +62,26 @@ class DarknetWrapper:
                             self.class_colors[label], 2)
 
 
+class YOLOv4(DarknetWrapper):
+    CONFIG_FILE = "data/yolov4.cfg"
+    DATA_FILE = "data/coco.data"
+    WEIGHTS_FILE = "data/yolov4.weights"
+
+    def __init__(self):
+        DarknetWrapper.__init__(self, config=self.CONFIG_FILE, 
+            data=self.DATA_FILE, weights=self.WEIGHTS_FILE)
+
+
+class YOLOv4Tiny(DarknetWrapper):
+    CONFIG_FILE = "data/yolov4-tiny.cfg"
+    DATA_FILE = "data/coco.data"
+    WEIGHTS_FILE = "data/yolov4-tiny.weights"
+
+    def __init__(self):
+        DarknetWrapper.__init__(self, config=self.CONFIG_FILE, 
+            data=self.DATA_FILE, weights=self.WEIGHTS_FILE)
+
+
 if __name__ == "__main__":
-    dw = DarknetWrapper()
-    dw.detect_image("data/person.jpg")
+    yolo = YOLOv4()
+    yolo.detect_image("data/person.jpg")
