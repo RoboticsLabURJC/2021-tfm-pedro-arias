@@ -3,7 +3,7 @@ import cv2
 import yolo_utils
 
 yolo4_tiny = yolo_utils.YOLOv4Tiny()
-# yolo4 = yolo_utils.DarknetWrapper()
+# yolo4 = yolo_utils.YOLOv4()
 
 cap = cv2.VideoCapture("/dev/video0") # check this
 while(True):
