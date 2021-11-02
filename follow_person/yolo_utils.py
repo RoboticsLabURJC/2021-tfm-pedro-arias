@@ -1,5 +1,5 @@
 import sys
-sys.path.append("/home/nvidia/repos/darknet")
+sys.path.append("/home/parias/repos/darknet")
 
 import cv2
 import numpy as np
@@ -61,6 +61,18 @@ class DarknetWrapper:
                             (left, top - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                             self.class_colors[label], 2)
 
+    def detect_object(self, frame, object_):
+        # call our darknet helper on video frame
+        height, width, channels = frame.shape
+        detections, width_ratio, height_ratio = self.run_detector(frame, width, height)
+
+        # loop through detections and return first object match
+        for label, confidence, bbox in detections:
+            if label == object_:
+                left, top, right, bottom = darknet.bbox2points(bbox)
+                left, top, right, bottom = int(left * width_ratio), int(top * height_ratio), int(right * width_ratio), int(bottom * height_ratio)
+                return label, confidence, (left, top, right, bottom)
+        return None, 0, (0, 0, 0, 0)
 
 class YOLOv4(DarknetWrapper):
     CONFIG_FILE = "data/yolov4.cfg"

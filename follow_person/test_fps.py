@@ -17,7 +17,7 @@ while(True):
     n_frames += 1
 
     # Flip verticallly
-    frame = cv2.flip(frame, 0)
+    # frame = cv2.flip(frame, 0)
 
     # Our operations on the frame come here
     yolo4.detect_frame(frame)
