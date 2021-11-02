@@ -43,3 +43,10 @@ Thumbs.db
 # Build folders #
 #################
 */build/*
+
+# YOLO cfg #
+############
+*.names
+*.cfg
+*.weights
+*.data
