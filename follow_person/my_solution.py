@@ -7,10 +7,9 @@ from cv_bridge import CvBridgeError
 import cv2
 import numpy as np
 import yolo_utils
-
+import math
 
 RATE = 50
-
 
 # ====== P CONTROLLER =======
 def p_controller(Kp, error):
@@ -44,6 +43,10 @@ def d_controller_3(Kd, error):
     return ud
 
 
+def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
+    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+
+
 def execute(img, label, points):
     height, width, channels = img.shape
     center_image_x = width / 2
@@ -55,12 +58,11 @@ def execute(img, label, points):
     y_error = 0
     z_error = 0
     x_error = 0
-    print(width, height)
     if label:
         area = ((points[2] - points[0]) * (points[3] - points[1]))/2
         cx = (abs(points[0]) + abs(points[2]))/2
         cy = (abs(points[1]) + abs(points[3]))/2
-        print(label, (cx, cy), area)
+        # print(label, (cx, cy), area)
 
         y_error = -(center_image_x - cx)  # error between the center of the image and the current position of the centroid
         z_error = (center_image_y - cy)
@@ -80,10 +82,15 @@ def execute(img, label, points):
     cv2.imshow("Cam", rgb_img)
     cv2.waitKey(3)
 
-    vy = p_controller(0.02, y_error) + d_controller(0.0001, y_error)
-    vz = p_controller(0.02, z_error) + d_controller_2(0.001, z_error)
-    vx = p_controller(0.5, x_error)
-    return -vy, -vx, vz, 0
+    yaw_rate = p_controller(0.0005, y_error) + d_controller(0.001, y_error)
+    vz = p_controller(0.02, z_error) + d_controller(0.001, y_error)
+    vx = p_controller(0.1, x_error) + d_controller(0.001, y_error)
+
+    if isclose(vx, 0.0, rel_tol=0.00001):
+        vx = 0.0001
+    if isclose(vz, 0.0, rel_tol=0.00001):
+        vz = 0.001
+    return 0, -vx, vz, -yaw_rate
 
 
 def main():
@@ -97,8 +104,8 @@ def main():
     while not rospy.is_shutdown():
         try:
             img = drone.get_frontal_image()
-            label, confidence, points = yolo4.detect_object(img, 'person')
 
+            label, confidence, points = yolo4.detect_object(img, 'person')
             vx, vy, vz, yaw_rate = execute(img, label, points)
             drone.set_cmd_vel(vy, vx, vz, yaw_rate)
         except CvBridgeError:

@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="world" default="$(find follow_person)/worlds/follow_polar_person.world"/>
+
+    <include file="$(find drone_wrapper)/launch/mavros_px4_sitl.launch">
+        <arg name="world" value="$(arg world)"/>
+        <arg name="Y" value="1.57"/>
+        <arg name="paused" default="true"/>
+    </include>
+</launch>
