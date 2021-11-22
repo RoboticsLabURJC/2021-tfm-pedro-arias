@@ -50,7 +50,8 @@ class DarknetWrapper:
 
     def detect_frame(self, frame):
         # call our darknet helper on video frame
-        detections, width_ratio, height_ratio = self.run_detector(frame)
+        height, width, channels = frame.shape
+        detections, width_ratio, height_ratio = self.run_detector(frame, width, height)
 
         # loop through detections and draw them on transparent overlay image
         for label, confidence, bbox in detections:
