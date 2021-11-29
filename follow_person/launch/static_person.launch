@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <launch>
+    <rosparam command="load" file="$(find follow_person)/config/sim.conf" />
+
     <arg name="world" default="$(find follow_person)/worlds/static_person.world"/>
 
     <include file="$(find drone_wrapper)/launch/mavros_px4_sitl.launch">

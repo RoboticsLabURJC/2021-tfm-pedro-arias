@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <launch>
+    <rosparam command="load" file="$(find follow_person)/config/tello.conf" />
+
     <!--    Drone model param   -->
     <arg name="drone_model" default="tello"/>
     <param name="drone_model" type="str" value="$(arg drone_model)" />
