@@ -9,7 +9,6 @@
     <arg name="image_cmd" default="/brain/cmd_response/image_raw"/>
 
     <node name="tello_driver_node" pkg="tello_driver" type="tello_driver_node.py" output="screen"/>
-    <!--<node name="drone" pkg="follow_person" type="my_solution_tello.py" output="screen"/>-->
     <node name="image_view_yolo" pkg="image_view" type="image_view">
         <remap from="image" to="$(arg image_yolo)"/>
     </node>
