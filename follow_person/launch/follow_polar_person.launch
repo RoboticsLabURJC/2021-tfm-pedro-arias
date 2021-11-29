@@ -7,4 +7,15 @@
         <arg name="Y" value="1.57"/>
         <arg name="paused" default="true"/>
     </include>
+
+    <!-- Image Post-processed-->
+    <arg name="image_yolo" default="/brain/yolo_output/image_raw"/>
+    <arg name="image_cmd" default="/brain/cmd_response/image_raw"/>
+
+    <node name="image_view_yolo" pkg="image_view" type="image_view">
+        <remap from="image" to="$(arg image_yolo)"/>
+    </node>
+    <node name="image_view_cmd" pkg="image_view" type="image_view">
+        <remap from="image" to="$(arg image_cmd)"/>
+    </node>
 </launch>
