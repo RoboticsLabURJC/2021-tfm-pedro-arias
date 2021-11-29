@@ -1,8 +1,9 @@
 #! /usr/bin/env python
 
 import rospy
+from sensor_msgs.msg import Image
 from drone_wrapper import DroneWrapper
-from cv_bridge import CvBridgeError
+from cv_bridge import CvBridge, CvBridgeError
 
 import cv2
 import numpy as np
@@ -94,6 +95,9 @@ def execute(img, label, points):
 
 
 def main():
+    img_pub = rospy.Publisher('my_solution/cam_frontal/image_raw', Image, queue_size=10)
+    bridge = CvBridge()
+
     drone = DroneWrapper()
     yolo4 = yolo_utils.YOLOv4()
 
@@ -108,8 +112,9 @@ def main():
             ### TEMP
             rgb_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             yolo4.detect_frame(rgb_img)
-            cv2.imshow("Cam", rgb_img)
-            cv2.waitKey(3)
+            img_pub.publish(bridge.cv2_to_imgmsg(rgb_img, 'bgr8'))
+            ## cv2.imshow("Cam", rgb_img)
+            ## cv2.waitKey(3)
 
             # label, confidence, points = yolo4.detect_object(img, 'person')
             # vx, vy, vz, yaw_rate = execute(img, label, points)
