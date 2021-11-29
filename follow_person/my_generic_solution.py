@@ -141,6 +141,7 @@ def execute(img, label, points):
     cmd_pub.publish(bridge.cv2_to_imgmsg(rgb_img, 'bgr8'))
 
     vx = vx_pid.update(x_error)
+    # vy = 0
     yaw_rate = Yr_pid.update(yaw_error)
     vz = vz_pid.update(z_error)
 
@@ -148,7 +149,7 @@ def execute(img, label, points):
         vx = 0.0001
     if isclose(vz, 0.0, rel_tol=0.00001):
         vz = 0.001
-    return 0, vx, vz, yaw_rate
+    return vx, 0, vz, yaw_rate
 
 
 def main():
@@ -168,7 +169,7 @@ def main():
 
             label, confidence, points = yolo4.detect_object(img, 'person')
             vx, vy, vz, yaw_rate = execute(img, label, points)
-            drone.set_cmd_vel(vy, vx, vz, yaw_rate)
+            drone.set_cmd_vel(vx, vy, vz, yaw_rate)
         except CvBridgeError:
             print("Error")
             pass
