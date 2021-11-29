@@ -1,8 +1,9 @@
 #! /usr/bin/env python
 
 import rospy
+from sensor_msgs.msg import Image
 from drone_wrapper import DroneWrapper
-from cv_bridge import CvBridgeError
+from cv_bridge import CvBridge, CvBridgeError
 
 import cv2
 import numpy as np
@@ -10,6 +11,11 @@ import yolo_utils
 import math
 
 RATE = 50
+
+yolo_pub = rospy.Publisher('/brain/yolo_output/image_raw', Image, queue_size=10)
+cmd_pub = rospy.Publisher('/brain/cmd_response/image_raw', Image, queue_size=10)
+bridge = CvBridge()
+
 
 # ====== P CONTROLLER =======
 def p_controller(Kp, error):
@@ -55,7 +61,7 @@ def execute(img, label, points):
 
     rgb_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
-    y_error = 0
+    yaw_error = 0
     z_error = 0
     x_error = 0
     if label:
@@ -64,27 +70,27 @@ def execute(img, label, points):
         cy = (abs(points[1]) + abs(points[3]))/2
         # print(label, (cx, cy), area)
 
-        y_error = -(center_image_x - cx)  # error between the center of the image and the current position of the centroid
+        yaw_error = -(center_image_x - cx)  # error between the center of the image and the current position of the centroid
         z_error = (center_image_y - cy)
         x_error = (int(area) - target_area)/target_area
 
-        cv2.arrowedLine(rgb_img, (int(cx), int(cy)), (center_image_x + y_error, center_image_y),
+        cv2.arrowedLine(rgb_img, (int(cx), int(cy)), (int(cx), center_image_y),
             (255, 0, 0), thickness=3)
-        cv2.arrowedLine(rgb_img, (int(cx), int(cy)), (center_image_x, center_image_y - z_error),
+        cv2.arrowedLine(rgb_img, (int(cx), int(cy)), (center_image_x, int(cy)),
             (0, 255, 0), thickness=3)
-        #cv2.circle(rgb_img, (int(cx), int(cy)), 3, (0, 0, 255), cv2.FILLED, 4)
-
         if x_error < 0:
             cv2.putText(rgb_img, "X", (int(cx)-10, int(cy)+10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 4)
         else:
-            cv2.circle(rgb_img, (int(cx), int(cy)), abs(x_error)*5, (0, 0, 255), cv2.FILLED, 4)
+            cv2.circle(rgb_img, (int(cx), int(cy)), abs(x_error)*3, (0, 0, 255), cv2.FILLED, 4)
+    else:
+        # Looking for person to follow
+        return 0, 0, 0, 0.3
 
-    cv2.imshow("Cam", rgb_img)
-    cv2.waitKey(3)
+    cmd_pub.publish(bridge.cv2_to_imgmsg(rgb_img, 'bgr8'))
 
-    yaw_rate = p_controller(0.0005, y_error) + d_controller(0.001, y_error)
-    vz = p_controller(0.02, z_error) + d_controller(0.001, y_error)
-    vx = p_controller(0.1, x_error) + d_controller(0.001, y_error)
+    yaw_rate = p_controller(0.005, yaw_error) + d_controller(0.001, yaw_error)
+    vz = p_controller(0.02, z_error) + d_controller(0.001, z_error)
+    vx = p_controller(0.5, x_error) + d_controller(0.001, x_error)
 
     if isclose(vx, 0.0, rel_tol=0.00001):
         vx = 0.0001
@@ -104,6 +110,9 @@ def main():
     while not rospy.is_shutdown():
         try:
             img = drone.get_frontal_image()
+            rgb_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+            yolo4.detect_frame(rgb_img)
+            yolo_pub.publish(bridge.cv2_to_imgmsg(rgb_img, 'bgr8'))
 
             label, confidence, points = yolo4.detect_object(img, 'person')
             vx, vy, vz, yaw_rate = execute(img, label, points)

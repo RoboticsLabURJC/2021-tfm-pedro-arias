@@ -57,7 +57,7 @@ def execute(img, label, points):
     height, width, channels = img.shape
     center_image_x = width / 2
     center_image_y = height / 2
-    target_area = 3500
+    target_area = 5000
 
     rgb_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
@@ -75,15 +75,15 @@ def execute(img, label, points):
         x_error = (int(area) - target_area)/target_area
         print(x_error, yaw_error, z_error)
 
-        cv2.arrowedLine(rgb_img, (center_image_x, center_image_y), (center_image_x, int(cy)),
-            (255, 0, 0), thickness=3)  # Z
-        cv2.arrowedLine(rgb_img, (center_image_x, center_image_y), (int(cx), center_image_y),
-            (0, 255, 0), thickness=3)  # Y
+        cv2.arrowedLine(rgb_img, (int(cx), int(cy)), (int(cx), center_image_y),
+            (255, 0, 0), thickness=3)
+        cv2.arrowedLine(rgb_img, (int(cx), int(cy)), (center_image_x, int(cy)),
+            (0, 255, 0), thickness=3)
 
         if x_error < 0:
             cv2.putText(rgb_img, "X", (int(cx)-10, int(cy)+10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 4)
         else:
-            cv2.circle(rgb_img, (int(cx), int(cy)), abs(x_error)*5, (0, 0, 255), cv2.FILLED, 4)
+            cv2.circle(rgb_img, (int(cx), int(cy)), abs(x_error)*3, (0, 0, 255), cv2.FILLED, 4)
 
     cmd_pub.publish(bridge.cv2_to_imgmsg(rgb_img, 'bgr8'))
 
@@ -110,7 +110,6 @@ def main():
     while not rospy.is_shutdown():
         try:
             img = drone.get_frontal_image()
-
             rgb_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             yolo4.detect_frame(rgb_img)
             yolo_pub.publish(bridge.cv2_to_imgmsg(rgb_img, 'bgr8'))
