@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+    <!--    Drone model param   -->
+    <arg name="drone_model" default="tello"/>
+    <param name="drone_model" type="str" value="$(arg drone_model)" />
+
+    <!-- Image Post-processed-->
+    <arg name="image_post" default="/my_solution/cam_frontal/image_raw"/>
+
+    <node name="tello_driver_node" pkg="tello_driver" type="tello_driver_node.py" output="screen"/>
+    <!--<node name="drone" pkg="follow_person" type="my_solution_tello.py" output="screen"/>-->
+    <node name="image_view" pkg="image_view" type="image_view">
+        <remap from="image" to="$(arg image_post)"/>
+    </node>
+</launch>
