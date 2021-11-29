@@ -100,7 +100,7 @@ def execute(img, label, points):
 
 
 def main():
-    drone = DroneWrapper()
+    drone = DroneWrapper(name='iris_sim')
     yolo4 = yolo_utils.YOLOv4()
 
     drone.takeoff(h=2, precision=0.2)
