@@ -52,8 +52,8 @@ namespace gazebo
                 this->vel = 0.5 + double(rand()) / RAND_MAX * 1.0;
             }
             this->cont = this->cont + 1;
-            vx = 0*cos(pose.Rot().Yaw()) - 0.5*sin(pose.Rot().Yaw());
-            vy = 0*sin(pose.Rot().Yaw()) + 0.5*cos(pose.Rot().Yaw());
+            vx = 0*cos(pose.Rot().Yaw()) - 1*sin(pose.Rot().Yaw());
+            vy = 0*sin(pose.Rot().Yaw()) + 1*cos(pose.Rot().Yaw());
             this->model->SetLinearVel(ignition::math::Vector3d(-vx, -vy, 0));
             //std::cout << "Cont " << cont << " at [" << pose.Pos() << "]" << std::endl;
         }
