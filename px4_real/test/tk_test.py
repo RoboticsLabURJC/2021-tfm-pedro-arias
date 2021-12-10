@@ -2,7 +2,7 @@
 
 import rospy
 import time
-from mavros_msgs.srv import CommandBool, CommandTOL, CommandTOLRequest
+from mavros_msgs.srv import CommandBool, CommandTOL, CommandTOLRequest, SetMode
 from sensor_msgs.msg import NavSatFix
 
 RATE = 50
@@ -31,12 +31,15 @@ def main():
     arm_srv = rospy.ServiceProxy('/mavros/cmd/arming', CommandBool)
     tk_srv = rospy.ServiceProxy('/mavros/cmd/takeoff', CommandTOL)
     land_srv = rospy.ServiceProxy('/mavros/cmd/land', CommandTOL)
+    mode_srv = rospy.ServiceProxy('/mavros/set_mode', SetMode)
     print("Ready!")
     time.sleep(2)
 
-    print("\nTaking off..", lat, lon, 1)
+    print("\nTaking off..", lat, lon, 2.5)
     arm_srv(True)
-    resp = tk_srv(0, 0, lat, lon, 1)
+    #resp = mode_srv(base_mode=0, custom_mode='AUTO.TAKEOFF')
+    #print(resp)
+    resp = tk_srv(altitude=2.5)
     print(resp)
     time.sleep(10)
 
