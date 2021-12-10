@@ -16,9 +16,6 @@ print("Drone at {0}".format(drone.get_position()[-1]))
 # time.sleep(5)
 # print("Drone at {0}".format(drone.get_position()[-1]))
 
-# drone.set_cmd_vel(az=0.5)
-# time.sleep(5)
-
 drone.land()
 time.sleep(3)
 print("Test finished.")
