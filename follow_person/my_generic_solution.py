@@ -11,7 +11,7 @@ import yolo_utils
 import math
 import time
 
-ASPECT_RATIO = 30  # la trigesima parte de la imagen esta ocupada por el area de le persona
+TR = 20 # TARGET_RATIO: la vigesima parte de la imagen esta ocupada por el area de la persona
 RATE = 50
 
 yolo_pub = rospy.Publisher('/brain/yolo_output/image_raw', Image, queue_size=10)
@@ -116,18 +116,17 @@ def execute(img, label, points):
     height, width, channels = img.shape
     center_image_x = width / 2
     center_image_y = height / 2
-    target_area = height * width / ASPECT_RATIO
 
     rgb_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
     x_error, yaw_error, z_error = 0, 0, 0
     if label:
-        area = ((points[2] - points[0]) * (points[3] - points[1]))/2
+        area = (points[2] - points[0]) * (points[3] - points[1])
         cx = (abs(points[0]) + abs(points[2]))/2
         cy = (abs(points[1]) + abs(points[3]))/2
 
         # error between the center of the image and the current position of the centroid
-        x_error = (int(area) - target_area)/target_area
+        x_error = TR - int((height * width)/area)
         yaw_error = (center_image_x - cx)
         z_error = (center_image_y - cy)
 
