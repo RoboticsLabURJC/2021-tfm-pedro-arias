@@ -67,12 +67,17 @@ class DarknetWrapper:
         height, width, channels = frame.shape
         detections, width_ratio, height_ratio = self.run_detector(frame, width, height)
 
+        confidences = []
+        points = []
         # loop through detections and return first object match
         for label, confidence, bbox in detections:
             if label == object_:
                 left, top, right, bottom = darknet.bbox2points(bbox)
                 left, top, right, bottom = int(left * width_ratio), int(top * height_ratio), int(right * width_ratio), int(bottom * height_ratio)
-                return label, confidence, (left, top, right, bottom)
+                confidences.append(confidence)
+                points.append((left, top, right, bottom))
+        if confidences:
+            return label, confidences, points
         return None, 0, (0, 0, 0, 0)
 
 class YOLOv4(DarknetWrapper):

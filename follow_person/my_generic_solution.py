@@ -13,6 +13,7 @@ import time
 
 TR = 20 # TARGET_RATIO: la vigesima parte de la imagen esta ocupada por el area de la persona
 RATE = 50
+CENTROIDS = np.array([(0,0)]*3)
 
 yolo_pub = rospy.Publisher('/brain/yolo_output/image_raw', Image, queue_size=10)
 cmd_pub = rospy.Publisher('/brain/cmd_response/image_raw', Image, queue_size=10)
@@ -112,18 +113,72 @@ def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
     return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
 
-def execute(img, label, points):
+def get_centroid(points):
+    '''
+    points: (A, B, C, D)
+    points: [(A1, B1, C1, D1), (A2, B2, C2, D2), ... ]
+
+     (A, B) o-------o
+            |       |
+            |   c   |
+            |       |
+            o-------o (C, D)
+
+    return c: centroid (cx, cy)
+    return c: list of centroids [(cx1, cy1), (cx2, cy2)]
+    '''
+    if not isinstance(points[0], tuple):  # just one point
+        cx = (abs(points[0]) + abs(points[2]))/2
+        cy = (abs(points[1]) + abs(points[3]))/2
+        return (cx, cy)
+    else:
+        centroids = []
+        for p in points:
+            cx = (abs(p[0]) + abs(p[2]))/2
+            cy = (abs(p[1]) + abs(p[3]))/2
+            centroids.append((cx, cy))
+        return centroids
+
+
+def update_centroids(c):
+    global CENTROIDS
+    CENTROIDS = CENTROIDS[1:]
+    CENTROIDS = np.append(CENTROIDS, [c], axis=0)
+
+
+def distance(a, b):
+    '''
+    Euclidean distance
+    a: (x, y)
+    b: (x, y)
+    '''
+    return math.sqrt(math.pow(b[0]-a[0], 2) + math.pow(b[1]-b[1], 2))
+
+
+def execute(img, label, confidence, points):
     height, width, channels = img.shape
     center_image_x = width / 2
     center_image_y = height / 2
 
-    rgb_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    print(CENTROIDS)  # DEBUG
 
+    rgb_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    idx = 0
     x_error, yaw_error, z_error = 0, 0, 0
-    if label:
-        area = (points[2] - points[0]) * (points[3] - points[1])
-        cx = (abs(points[0]) + abs(points[2]))/2
-        cy = (abs(points[1]) + abs(points[3]))/2
+    if label and len(confidence) > 1:
+        print("START", label, confidence, points)  # DEBUG
+        centroid = CENTROIDS.mean(axis=0)
+        if (centroid == np.zeros(2)).all():  # No person chosen yet
+            idx = confidence.index(max(confidence))
+        else:
+            temp = get_centroid(points)  # list of centroids of all detections
+            idx = temp.index(min(temp, key=lambda x: distance(x, centroid)))  # find closest to centroid
+        confidence = [confidence[idx]]
+        print("END", label, confidence, points)  # DEBUG
+    if label and len(confidence) == 1:
+        area = (points[idx][2] - points[idx][0]) * (points[idx][3] - points[idx][1])
+        cx, cy = get_centroid(points[idx])
+        update_centroids((cx, cy))
 
         # error between the center of the image and the current position of the centroid
         x_error = TR - int((height * width)/area)
@@ -138,17 +193,18 @@ def execute(img, label, points):
             cv2.circle(rgb_img, (int(cx), int(cy)), abs(x_error)*3, (0, 0, 255), cv2.FILLED, 4)
     else:
         # Looking for person to follow
+        update_centroids((0, 0))
         return 0, 0, 0, 0.3
 
     cmd_pub.publish(bridge.cv2_to_imgmsg(rgb_img, 'bgr8'))
 
-    print("Error", x_error, yaw_error, z_error)
+    print("Error", x_error, yaw_error, z_error)  # DEBUG
     vx = vx_pid.update(x_error)
     # vy = 0
     yaw_rate = Yr_pid.update(yaw_error)
     vz = vz_pid.update(z_error)
 
-    print("Vels", vx, yaw_rate, vz)
+    print("Vels", vx, yaw_rate, vz)  # DEBUG
 
     if isclose(vx, 0.0, rel_tol=0.00001):
         vx = 0.0001
@@ -178,7 +234,7 @@ def main():
             yolo_pub.publish(bridge.cv2_to_imgmsg(rgb_img, 'bgr8'))
 
             label, confidence, points = yolo4.detect_object(img, 'person')
-            vx, vy, vz, yaw_rate = execute(img, label, points)
+            vx, vy, vz, yaw_rate = execute(img, label, confidence, points)
             drone.set_cmd_vel(vx, vy, vz, yaw_rate)
 
             # Print FPS
