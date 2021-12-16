@@ -12,5 +12,6 @@ def callback(msg):
     cv2.waitKey(2)
 
 rospy.init_node("test_victure_cam")
-rospy.Subscriber("victure_cam/image_raw", Image, callback)
+victure_topic = rospy.get_param("victure_topic", "victure_cam/image_raw")
+rospy.Subscriber(victure_topic, Image, callback)
 rospy.spin()

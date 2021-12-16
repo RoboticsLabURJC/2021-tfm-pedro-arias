@@ -6,8 +6,8 @@ from sensor_msgs.msg import Image
 import cv2
 
 rospy.init_node("victure_cam")
-
-img_pub = rospy.Publisher("victure_cam/image_raw", Image, queue_size=10)
+victure_topic = rospy.get_param("victure_topic", "victure_cam/image_raw")
+img_pub = rospy.Publisher(victure_topic, Image, queue_size=10)
 bridge = CvBridge()
 
 cap = cv2.VideoCapture("/dev/video0")
