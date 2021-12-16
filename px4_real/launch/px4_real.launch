@@ -20,6 +20,8 @@
 		<arg name="respawn_mavros" default="$(arg respawn_mavros)" />
 	</include>
 
+	<param name="/mavros/conn/timesync_rate" value="0.0"/>
+
 	<arg name="camera" default="/px4_real/cam_frontal/image_raw"/>
 	<param name="victure_topic" type="str" value="$(arg camera)"/>
 	<node pkg="victure_driver" type="video_bridge.py" name="victure_cam" output="screen"/>
