@@ -1,5 +1,5 @@
 import sys
-sys.path.append("/home/parias/repos/darknet")
+sys.path.append("/home/nvidia/repos/darknet")
 
 import cv2
 import numpy as np
