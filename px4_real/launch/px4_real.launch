@@ -1,5 +1,4 @@
 <launch>
-
 	<arg name="fcu_url" default="/dev/ttyUSB0:57600" />
 	<arg name="gcs_url" default="" />
 	<arg name="tgt_system" default="1" />
@@ -21,13 +20,7 @@
 		<arg name="respawn_mavros" default="$(arg respawn_mavros)" />
 	</include>
 
-	<arg name="camera" default="/victure_cam/image_raw"/>
-	<param name="cam_frontal_topic" type="str" value="$(arg camera)"/>
-
-	<arg name="perspective" default="$(find rqt_drone_teleop)/perspectives/drone_teleop_cam.perspective"/>
-
+	<arg name="camera" default="/px4_real/cam_frontal/image_raw"/>
+	<param name="victure_topic" type="str" value="$(arg camera)"/>
 	<node pkg="victure_driver" type="video_bridge.py" name="victure_cam" output="screen"/>
-	<node pkg="drone_wrapper" type="drone_wrapper_class.py" name="drone_wrapper" output="screen"/>  
-	<node name="rqt_gui" pkg="rqt_gui" type="rqt_gui" respawn="false" output="screen" args="--perspective-file $(arg perspective)"/>
-
 </launch>
