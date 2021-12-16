@@ -11,10 +11,16 @@
     <arg name="image_cmd" default="/brain/cmd_response/image_raw"/>
 
     <node name="tello_driver_node" pkg="tello_driver" type="tello_driver_node.py" output="screen"/>
+    
+<!--
     <node name="image_view_yolo" pkg="image_view" type="image_view">
         <remap from="image" to="$(arg image_yolo)"/>
     </node>
     <node name="image_view_cmd" pkg="image_view" type="image_view">
         <remap from="image" to="$(arg image_cmd)"/>
     </node>
+-->
+
+    <arg name="perspective" default="$(find follow_person)/perspectives/follow_person.perspective"/>
+    <node name="rqt_gui" pkg="rqt_gui" type="rqt_gui" respawn="false" output="screen" args="--perspective-file $(arg perspective)"/>
 </launch>
