@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<launch>
+    <rosparam command="load" file="$(find follow_person)/config/px4_real.conf" />
+
+    <!--    Drone model param   -->
+    <arg name="drone_model" default="px4_real"/>
+    <param name="drone_model" type="str" value="$(arg drone_model)" />
+
+    <!-- Image Post-processed-->
+    <arg name="image_yolo" default="/brain/yolo_output/image_raw"/>
+    <arg name="image_cmd" default="/brain/cmd_response/image_raw"/>
+
+    <include file="$(eval env('PWD) + '/../px4_real/launch/px4_real.launch'">
+        <arg name="camera" value="$(arg drone_model)/cam_frontal/image_raw"/>
+    </include>
+    
+<!--
+    <node name="image_view_yolo" pkg="image_view" type="image_view">
+        <remap from="image" to="$(arg image_yolo)"/>
+    </node>
+    <node name="image_view_cmd" pkg="image_view" type="image_view">
+        <remap from="image" to="$(arg image_cmd)"/>
+    </node>
+-->
+
+    <arg name="perspective" default="$(find follow_person)/perspectives/follow_person.perspective"/>
+    <node name="rqt_gui" pkg="rqt_gui" type="rqt_gui" respawn="false" output="screen" args="--perspective-file $(arg perspective)"/>
+</launch>
