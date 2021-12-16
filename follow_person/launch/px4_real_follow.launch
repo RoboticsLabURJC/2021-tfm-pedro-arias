@@ -10,7 +10,7 @@
     <arg name="image_yolo" default="/brain/yolo_output/image_raw"/>
     <arg name="image_cmd" default="/brain/cmd_response/image_raw"/>
 
-    <include file="$(eval env('PWD) + '/../px4_real/launch/px4_real.launch'">
+    <include file="$(eval env('PWD) + '/../px4_real/launch/px4_real.launch')">
         <arg name="camera" value="$(arg drone_model)/cam_frontal/image_raw"/>
     </include>
     
