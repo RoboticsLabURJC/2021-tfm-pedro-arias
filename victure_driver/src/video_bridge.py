@@ -15,6 +15,7 @@ while(True):
     ret, frame = cap.read()
     if ret:
         img_pub.publish(bridge.cv2_to_imgmsg(frame))
+        # img_pub.publish(bridge.cv2_to_imgmsg(cv2.flip(frame,0), "bgr8"))
     
     if 0xFF == ord('q'):
         break
