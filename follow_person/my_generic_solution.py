@@ -228,7 +228,6 @@ def main():
     while not rospy.is_shutdown():
         try:
             img = drone.get_frontal_image()
-            n_frames += 1
             rgb_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             yolo4.detect_frame(rgb_img)
             yolo_pub.publish(bridge.cv2_to_imgmsg(rgb_img, 'bgr8'))
@@ -238,6 +237,7 @@ def main():
             drone.set_cmd_vel(vx, vy, vz, yaw_rate)
 
             # Print FPS
+            n_frames += 1
             print("FPS:", n_frames/(time.time() - t0))
         except CvBridgeError:
             print("Error")
