@@ -1,0 +1,35 @@
+\documentclass[../main.tex]{subfiles}
+\graphicspath{{\subfix{../imgs/}}}
+\begin{document}
+
+\chapter{Conclusiones y Líneas Futuras} \label{cap:concl}
+Este capítulo final reúne las conclusiones alcanzadas tras la realización del proyecto y describe posibles líneas futuras de trabajo que surgen a partir del mismo. Estas líneas de trabajo suponen, en su mayoría, vías de mejora para la infraestructura en nuevos desarrollos.
+
+\section{Conclusiones} \label{section:concl}
+El trabajo finaliza con una nueva infraestructura para la programación de drones disponible para la comunidad. Se ha demostrado el correcto funcionamiento de dicha infraestructura a través del uso de tres aeronaves diferentes y sobre dos aplicaciones distintas.
+
+La infraestructura desarrollada consiste en un producto con una arquitectura modular compleja basada en ROS. Los diferentes componentes se dividen en programas con diversos nodos que se comunican a través de múltiples \emph{topics} y servicios. El código ha sido desarrollado en Python, y los programas principales como \emph{DroneWrapper} o \emph{TelloDriver} tienen una extensión de 700 y 600 líneas de código fuente respectivamente, sin incluir todos los archivos de lanzamiento, de simulación, de testeo, etc., elaborados durante el desarrollo. Por tanto, se puede concluir que los objetivos descritos en la Sección \ref{section:intro-objetivos} se han satisfecho.
+
+El primero de los objetivos, el desarrollo de herramientas para la programación de multicópteros se ha completado durante el Capítulo \ref{cap:infra} con la propuesta del software \emph{DroneWrapper}. La infraestructura basada en los estándares de MAVROS y MAVLink presenta como gran novedad un control en velocidad, común en robótica móvil pero poco habitual en la robótica aérea. Incorpora también otros métodos como la obtención de información de los sensores de visión que posibilita la construcción de aplicaciones visuales sobre la infraestructura. \\
+La selección de ROS como \emph{middleware} permite garantizar la seguridad y la robustez, objetivos secundarios del proyecto. Además, el diseño elegido facilita una alta usabilidad, pues la interfaz de programación ofrecida al usuario (ver Tabla \ref{tab:api}) es sencilla de usar.
+
+El segundo de los objetivos, el uso de distintas aeronaves, se ha satisfecho con la utilización de tres multicópteros distintos, tanto reales como simulados, tal como se ha descrito el material en el Capítulo \ref{cap:met}. La distinta naturaleza de los drones seleccionados cumple con los objetivos secundarios fijados, y permite demostrar la horizontalidad de la infraestructura.
+
+Finalmente, el tercero de los objetivos, el desarrollo de diferentes aplicaciones, se ha superado con las dos aplicaciones explicadas en el Capítulo \ref{cap:aplic}, que se han validado experimentalmente. Las dos aplicaciones propuestas ofrecen distinto tipo de complejidad técnica, siendo viable para todo tipo de usuarios, sean novatos o expertos en el campo de la robótica. Incluyen una parte perceptiva basada en visión, mediante técnicas clásicas o modernas (aprendizaje profundo), y una parte de control reactivo, en velocidad, para los motores que emplea controladores PID. 
+
+El trabajo concluye con una versión operativa de la infraestructura publicada como software libre en GitHub, utilizada no solo en las aplicaciones propuestas, sino también en otros proyectos de software libre como Unibotics \cite{unibotics} o BehaviorMetrics \cite{behavior-metrics} de JdeRobot \cite{jderobot}. El resultado final ofrece una opción viable y muy completa para la programación de aplicaciones para drones, como se ha demostrado a lo largo de esta memoria, para todo tipo de usuarios y campos de aplicación.
+
+\section{Líneas futuras} \label{section:fut}
+La infraestructura propuesta ofrece un punto de inicio para multitud de aplicaciones reales con drones. Pese a ser un producto sólido y en explotación, existen múltiples posibilidades de mejora y de funcionalidades de las cuales dotar el software. Alguna de estas, pueden ser:
+
+\begin{enumerate}
+    \item Extender el soporte de la infraestructura a nuevas aeronaves. Comprende el desarrollo de nuevo drivers de comunicación con nuevos tipos de aeronave. Ejemplo de ello serían otras aeronaves DJI o los drones Parrot.
+    \item Dotar de usabilidad a nuevos sensores. La infraestructura solamente soporta hoy en día el uso de cámaras. Otros sensores, véase por ejemplo sensores LiDAR o balizas de radio-frecuencia (RF), pueden resultar útiles para algunas aplicaciones del usuario.
+    \item Añadir nuevas funcionalidades a la interfaz de programación de usuario. Nuevas opciones que permitan al usuario tareas como la navegación convencional (global) o la obtención de más datos acerca de la aeronave.
+    \item Cambio a Python3. La versión actual de Python está obsoleta y necesita una actualización a una versión actual.
+    \item Cambio a ROS2. La infraestructura está construida sobre ROS Melodic, el cual posee mantenimiento hasta marzo de 2023. Existe también una versión más actual en ROS Noetic, aunque sería conveniente el salto a ROS2 Foxy. Sin embargo, el paso a ROS2 no es trivial y supone muchos cambios en la arquitectura.
+    \item Desarrollo de nuevas aplicaciones que usen la infraestructura y permitan demostrar su validez en diversos ámbitos y con distintas aeronaves.
+    \item Popularizar su uso. Dar visibilidad a la aplicación para que otros miembros de la comunidad puedan disfrutar de la misma.
+\end{enumerate}
+
+\end{document}

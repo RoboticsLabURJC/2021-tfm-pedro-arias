@@ -1,0 +1,9 @@
+despegue
+while:
+    obten imagen
+    filtro color
+    if ``color'':
+        nuevo error
+        actualiza PIDs
+        cmd velocidad
+land

@@ -1,0 +1,781 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%              INTRODUCCIÓN             %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% historia, intro, contexto
+@article{martin2007historia,
+  title={Historia de la robótica: de Arquitas de Tarento al robot Da Vinci (Parte I)},
+  author={Martín, FM Sánchez and Rodríguez, F Millán and Bayarri, J Salvador and Redorta, J Palou and Escovar, F Rodríguez and Fernández, S Esquena and Mavrich, H Villavicencio},
+  journal={Actas Urológicas Españolas},
+  volume={31},
+  number={2},
+  pages={69--76},
+  year={2007},
+  publisher={Elsevier}
+}
+
+% historia, intro, contexto
+@book{baturone2005robotica,
+  title={Robótica: manipuladores y robots móviles},
+  author={Baturone, Aníbal Ollero},
+  year={2005},
+  publisher={Marcombo}
+}
+
+% RAE, intro, contexto
+@misc{rae,
+  title = {Diccionario de la lengua española, 23.º ed.},
+  author = {Real Academia Española},
+  howpublished = {\url{https://dle.rae.es}},
+  note = {Último acceso: 02-02-2020}
+}
+
+% clasificacion, intro, contexto
+@article{de2006robotica,
+  title={Robótica: Estado del arte},
+  author={de Garibay Pascual, Jonathan Ruiz},
+  journal={Universidad de Deuston. Número. Fecha},
+  pages={54},
+  year={2006}
+}
+
+@article{barrientos2007vehiculos,
+  title={Vehículos aéreos no tripulados para uso civil. Tecnología y aplicaciones},
+  author={Barrientos, Antonio and Del Cerro, J and Gutiérrez, P and San Martín, R and Martínez, A and Rossi, C},
+  journal={Universidad politécnica de Madrid, Madrid},
+  year={2007}
+}
+
+@misc{fomento-2018,
+  title = {Plan Estratégico para el desarrollo del sector civil de los drones en España 2018-2021},
+  author = {Ministerio de Fomento},
+  howpublished = {\url{https://www.fomento.gob.es/NR/rdonlyres/7B974E30-2BD2-46E5-BEE5-26E00851A455/148411/PlanEstrategicoDrones.pdf}},
+  note = {Último acceso: 07-07-2021}
+}
+
+@misc{dgt-2021,
+  title = {Tráfico distribuye los 39 drones que vigilarán las carreteras españolas este verano},
+  author = {Dirección General de Tráfico},
+  howpublished = {\url{https://www.dgt.es/es/prensa/notas-de-prensa/2021/Trafico_distribuye_los_39_drones_que_vigilaran_las_carreteras_espanolas_este_verano.shtml}},
+  note = {Último acceso: 12-07-2021}
+}
+
+@article{kim2019unmanned,
+  title={Unmanned aerial vehicles in agriculture: A review of perspective of platform, control, and applications},
+  author={Kim, Jeongeun and Kim, Seungwon and Ju, Chanyoung and Son, Hyoung Il},
+  journal={IEEE Access},
+  volume={7},
+  pages={105100--105115},
+  year={2019},
+  publisher={IEEE}
+}
+
+@article{radoglou2020compilation,
+  title={A compilation of UAV applications for precision agriculture},
+  author={Radoglou-Grammatikis, Panagiotis and Sarigiannidis, Panagiotis and Lagkas, Thomas and Moscholios, Ioannis},
+  journal={Computer Networks},
+  volume={172},
+  pages={107148},
+  year={2020},
+  publisher={Elsevier}
+}
+
+@article{yao2019unmanned,
+  title={Unmanned aerial vehicle for remote sensing applications—A review},
+  author={Yao, Huang and Qin, Rongjun and Chen, Xiaoyu},
+  journal={Remote Sensing},
+  volume={11},
+  number={12},
+  pages={1443},
+  year={2019},
+  publisher={Multidisciplinary Digital Publishing Institute}
+}
+
+@misc{eecti-2021,
+  title = {Estrategia Española de Ciencia, Tecnología e Innovación 2021-2027},
+  author = {Ministerio de Ciencia e Innovación},
+  howpublished = {\url{https://www.ciencia.gob.es/stfls/MICINN/Ministerio/FICHEROS/EECTI-2021-2027.pdf}},
+  note = {Último acceso: 07-07-2021}
+}
+
+@misc{regl-ejec,
+  title = {Reglamento de Ejecución (UE) 2019/947},
+  author = {European Economic Area},
+  howpublished = {\url{https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02019R0947-20200606}},
+  note = {Último acceso: 10-01-2022}
+}
+
+@misc{regl-deleg,
+  title = {Reglamento Delegado (UE) 2019/945},
+  author = {European Economic Area},
+  howpublished = {\url{https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:02019R0945-20200809}},
+  note = {Último acceso: 10-01-2022}
+}
+
+@misc{normativa,
+  title = {Normativa europea de UAS},
+  author = {Agencia Estatal de Seguridad Aérea},
+  howpublished = {\url{https://www.seguridadaerea.gob.es/es/ambitos/drones/normativa-europea-de-uas-drones}},
+  note = {Último acceso: 10-01-2022}
+}
+
+@misc{u-space,
+  title = {U-Space},
+  author = {SESAR},
+  howpublished = {\url{https://www.sesarju.eu/U-space}},
+  note = {Último acceso: 10-01-2022}
+}
+
+@misc{amazon,
+  title = {Amazon Prime Air},
+  author = {Amazon},
+  howpublished = {\url{https://www.amazon.com/Amazon-Prime-Air/b?node=8037720011}},
+  note = {Último acceso: 11-01-2022}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%           ESTADO DEL ARTE             %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% QGroundControl
+@misc{qgcs,
+  title = {QGroundControl},
+  author = {DronecodeProject},
+  howpublished = {\url{http://qgroundcontrol.com/}},
+  note = {Último acceso: 12-07-2021}
+}
+
+% Mission Planner
+@misc{mission-planner,
+  title = {Mission Planner},
+  author = {ArduPilot-Dev-Team},
+  howpublished = {\url{https://ardupilot.org/planner/}},
+  note = {Último acceso: 12-07-2021}
+}
+
+% Aerostack
+@inproceedings{sanchez2016aerostack,
+  title={Aerostack: An architecture and open-source software framework for aerial robotics},
+  author={Sanchez-Lopez, Jose Luis and Fern{\'a}ndez, Ram{\'o}n A Su{\'a}rez and Bavle, Hriday and Sampedro, Carlos and Molina, Martin and Pestana, Jesus and Campoy, Pascual},
+  booktitle={2016 International Conference on Unmanned Aircraft Systems (ICUAS)},
+  pages={332--341},
+  year={2016},
+  organization={IEEE}
+}
+
+% Aerostack github
+@misc{aerostack-github,
+  title = {Aerostack Github},
+  author = {CVAR-UPM},
+  howpublished = {\url{https://github.com/aerostack}},
+  note = {Último acceso: 24-12-2021}
+}
+
+% CVAR-UPM
+@misc{cvar,
+  title = {Grupo de Visión por Computador y Robótica Aérea},
+  author = {Universidad Politécnica de Madrid},
+  howpublished = {\url{https://cvar-upm.github.io/}},
+  note = {Último acceso: 25-12-2021}
+}
+
+% ros
+@inproceedings{quigley2009ros,
+  title={ROS: an open-source Robot Operating System},
+  author={Quigley, Morgan and Conley, Ken and Gerkey, Brian and Faust, Josh and Foote, Tully and Leibs, Jeremy and Wheeler, Rob and Ng, Andrew Y and others},
+  booktitle={ICRA workshop on open source software},
+  volume={3},
+  number={3.2},
+  pages={5},
+  year={2009},
+  organization={Kobe, Japan}
+}
+
+% yarp
+@article{fitzpatrick2014middle,
+  title={A middle way for robotics middleware},
+  author={Fitzpatrick, Paul and Ceseracciu, Elena and Domenichelli, Daniele E and Paikan, Ali and Metta, Giorgio and Natale, Lorenzo},
+  journal={J. Softw. Eng. Robot},
+  volume={5},
+  number={2},
+  pages={42--49},
+  year={2014}
+}
+
+% yarp
+@article{metta2006yarp,
+  title={YARP: yet another robot platform},
+  author={Metta, Giorgio and Fitzpatrick, Paul and Natale, Lorenzo},
+  journal={International Journal of Advanced Robotic Systems},
+  volume={3},
+  number={1},
+  pages={8},
+  year={2006},
+  publisher={SAGE Publications Sage UK: London, England}
+}
+
+% orocos
+@inproceedings{bruyninckx2001open,
+  title={Open robot control software: the OROCOS project},
+  author={Bruyninckx, Herman},
+  booktitle={Proceedings 2001 ICRA. IEEE international conference on robotics and automation (Cat. No. 01CH37164)},
+  volume={3},
+  pages={2523--2528},
+  year={2001},
+  organization={IEEE}
+}
+
+% montemerlo
+@inproceedings{montemerlo2003perspectives,
+  title={Perspectives on standardization in mobile robot programming: The Carnegie Mellon navigation (CARMEN) toolkit},
+  author={Montemerlo, Michael and Roy, Nicholas and Thrun, Sebastian},
+  booktitle={Proceedings 2003 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS 2003)(Cat. No. 03CH37453)},
+  volume={3},
+  pages={2436--2441},
+  year={2003},
+  organization={IEEE}
+}
+
+% osrf
+@misc{osrf,
+  title = {OSRF},
+  author = {Open Source Robotics Foundation, Inc.},
+  howpublished = {\url{https://www.openrobotics.org/}},
+  note = {Último acceso: 13-07-2021}
+}
+
+% loop control, infraestructura
+@misc{loop-control,
+  title = {Bucle de control de un UAV},
+  author = {Dronecode Project, Inc.},
+  howpublished = {\url{https://dev.px4.io/master/en/concept/architecture.html}},
+  note = {Último acceso: 24-02-2020}
+}
+
+% px4
+@inproceedings{meier2015px4,
+  title={PX4: A node-based multithreaded open source robotics framework for deeply embedded platforms},
+  author={Meier, Lorenz and Honegger, Dominik and Pollefeys, Marc},
+  booktitle={2015 IEEE international conference on robotics and automation (ICRA)},
+  pages={6235--6240},
+  year={2015},
+  organization={IEEE}
+}
+
+% px4, modos de vuelo
+@misc{px4-flight-modes,
+  title = {Modos de vuelo},
+  author = {PX4},
+  howpublished = {\url{https://docs.px4.io/master/en/getting_started/flight_modes.html}},
+  note = {Último acceso: 12-01-2022}
+}
+
+% pixhawk
+@inproceedings{meier2011pixhawk,
+  title={Pixhawk: A system for autonomous flight using onboard computer vision},
+  author={Meier, Lorenz and Tanskanen, Petri and Fraundorfer, Friedrich and Pollefeys, Marc},
+  booktitle={2011 IEEE International Conference on Robotics and Automation},
+  pages={2992--2997},
+  year={2011},
+  organization={IEEE}
+}
+
+% DJI
+@misc{dji,
+  title = {DJI drones},
+  author = {DJI},
+  howpublished = {\url{https://www.dji.com/es}},
+  note = {Último acceso: 12-07-2021}
+}
+
+% Parrot
+@misc{parrot,
+  title = {Parrot drones},
+  author = {Parrot Drone SAS},
+  howpublished = {\url{https://www.parrot.com/es/drones}},
+  note = {Último acceso: 12-07-2021}
+}
+
+% 3DR Solo Drone
+@misc{3dr,
+  title = {3DR Drone},
+  author = {3DR Robotics},
+  howpublished = {\url{https://www.3dr.com/}},
+  note = {Último acceso: 12-07-2021}
+}
+
+% Tello articulo 1
+@article{anwar2020autonomous,
+  title={Autonomous navigation via deep reinforcement learning for resource constraint edge nodes using transfer learning},
+  author={Anwar, Aqeel and Raychowdhury, Arijit},
+  journal={IEEE Access},
+  volume={8},
+  pages={26549--26560},
+  year={2020},
+  publisher={IEEE}
+}
+
+% Tello articulo 2
+@inproceedings{scannell2021trajectory,
+  title={Trajectory Optimisation in Learned Multimodal Dynamical Systems Via Latent-ODE Collocation},
+  author={Scannell, Aidan and Ek, Carl Henrik and Richards, Arthur},
+  booktitle={IEEE International Conference on Robotics and Automation (ICRA)},
+  year={2021}
+}
+
+% Pixhawk, infraestructura
+@misc{pixhawk,
+  title = {Pixhawk},
+  author = {Auterion Ltd.},
+  howpublished = {\url{https://pixhawk.org/}},
+  note = {Último acceso: 07-03-2020}
+}
+
+% Ardupilot
+@misc{ardupilot,
+  title = {Ardupilot},
+  author = {Ardupilot Development Team and Community},
+  howpublished = {\url{https://ardupilot.org/}},
+  note = {Último acceso: 11-02-2020}
+}
+
+% PX4
+@misc{px4,
+  title = {PX4},
+  author = {Dronecode Project, Inc.},
+  howpublished = {\url{https://px4.io/}},
+  note = {Último acceso: 11-02-2020}
+}
+
+% Gazebo
+@misc{gazebo,
+  title = {Gazebo},
+  author = {Open Source Robotics Foundation},
+  howpublished = {\url{http://gazebosim.org/}},
+  note = {Último acceso: 11-02-2020}
+}
+
+% Airsim
+@misc{airsim,
+  title = {AirSim},
+  author = {Microsoft Research},
+  howpublished = {\url{https://microsoft.github.io/AirSim/}},
+  note = {Último acceso: 13-07-2021}
+}
+
+% jMAVSim
+@misc{jmavsim,
+  title = {jmavsim},
+  author = {Dronecode Project, Inc.},
+  howpublished = {\url{https://github.com/PX4/jMAVSim}},
+  note = {Último acceso: 13-07-2021}
+}
+
+% MAVLink
+@misc{mavlink,
+  title = {MAVLink},
+  author = {DronecodeProject},
+  howpublished = {\url{https://mavlink.io/en/}},
+  note = {Último acceso: 12-07-2021}
+}
+
+% Mavlink mensajes
+@misc{mavlink-msg,
+  title = {Documentación de MAVLink con los mensajes disponibles.},
+  author = {Dronecode Project, Inc.},
+  howpublished = {\url{https://mavlink.io/en/messages/common.html}},
+  note = {Último acceso: 26-02-2020}
+}
+
+% MAVLink microservices
+@misc{mavlink-microserv,
+  title = {Microservicios de MAVLink},
+  author = {Dronecode Project, Inc.},
+  howpublished = {\url{https://mavlink.io/en/services/}},
+  note = {Último acceso: 02-03-2020}
+}
+
+% Darknet
+@misc{darknet13,
+  author =   {Joseph Redmon},
+  title =    {Darknet: Open Source Neural Networks in C},
+  howpublished = {\url{http://pjreddie.com/darknet/}},
+  year = {2013}
+}
+
+% tensorflow
+@misc{tensorflow,
+  title = {TensorFlow},
+  author = {Google},
+  howpublished = {\url{https://www.tensorflow.org/}},
+  note = {Último acceso: 13-07-2021}
+}
+
+% keras
+@misc{keras,
+  title = {Keras},
+  author = {Keras Team},
+  howpublished = {\url{https://keras.io/}},
+  note = {Último acceso: 31-12-2021}
+}
+
+% pytorch
+@misc{pytorch,
+  title = {PyTorch},
+  author = {Facebook AI},
+  howpublished = {\url{https://pytorch.org/}},
+  note = {Último acceso: 31-12-2021}
+}
+
+% easa
+@misc{easa-roadmap,
+  title = {Artificial Intelligence Roadmap 1.0},
+  author = {EASA},
+  howpublished = {\url{https://www.easa.europa.eu/document-library/general-publications/easa-artificial-intelligence-roadmap-10}},
+  note = {Último acceso: 13-1-2022}
+}
+
+@article{sun2021autonomous,
+  title={Autonomous quadrotor flight despite rotor failure with onboard vision sensors: Frames vs. events},
+  author={Sun, Sihao and Cioffi, Giovanni and De Visser, Coen and Scaramuzza, Davide},
+  journal={IEEE Robotics and Automation Letters},
+  volume={6},
+  number={2},
+  pages={580--587},
+  year={2021},
+  publisher={IEEE}
+}
+
+@inproceedings{kaufmann2018deep,
+  title={Deep drone racing: Learning agile flight in dynamic environments},
+  author={Kaufmann, Elia and Loquercio, Antonio and Ranftl, Rene and Dosovitskiy, Alexey and Koltun, Vladlen and Scaramuzza, Davide},
+  booktitle={Conference on Robot Learning},
+  pages={133--145},
+  year={2018},
+  organization={PMLR}
+}
+
+@misc{drone-race,
+  title = {New Algorithm Flies Drones Faster than Human Racing Pilots},
+  author = {University of Zurich},
+  howpublished = {\url{https://www.media.uzh.ch/en/Press-Releases/2021/Drone-Race.html}},
+  note = {Último acceso: 13-1-2022}
+}
+
+@article{foehn2021time,
+  title={Time-optimal planning for quadrotor waypoint flight},
+  author={Foehn, Philipp and Romero, Angel and Scaramuzza, Davide},
+  journal={Science Robotics},
+  volume={6},
+  number={56},
+  pages={eabh1221},
+  year={2021},
+  publisher={American Association for the Advancement of Science}
+}
+
+@article{falanga2020dynamic,
+  title={Dynamic obstacle avoidance for quadrotors with event cameras},
+  author={Falanga, Davide and Kleber, Kevin and Scaramuzza, Davide},
+  journal={Science Robotics},
+  volume={5},
+  number={40},
+  year={2020},
+  publisher={Science Robotics}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%               MÉTODO                  %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% tesis angel
+@phdthesis{madridano2020arquitectura,
+    title    = {Arquitectura de software para navegación autónoma y coordinada de enjambres de drones en labores de lucha contra incendios forestales y urbanos},
+    school   = {Universidad Carlos III de Madrid},
+    author   = {Madridano Carrasco, Ángel},
+    year     = {2020},
+}
+
+% LSI
+@misc{lsi,
+  title = {Laboratoria de Sistemas Inteligentes},
+  author = {Universidad Carlos III de Madrid},
+  howpublished = {\url{https://lsi.uc3m.es/}},
+  note = {Último acceso: 26-12-2021}
+}
+
+% arduino
+@misc{arduino,
+  title = {Arduino},
+  author = {Arduino AG},
+  howpublished = {\url{https://www.arduino.cc/}},
+  note = {Último acceso: 27-12-2021}
+}
+
+% Raspberry pi
+@misc{raspberry,
+  title = {Raspberry pi},
+  author = {Raspberry Pi Foundation},
+  howpublished = {\url{https://www.raspberrypi.org/}},
+  note = {Último acceso: 27-12-2021}
+}
+
+% Pibot articulo
+@article{vega2018pibot,
+  title={PiBot: An open low-cost robotic platform with camera for STEM education},
+  author={Vega, Julio and Ca{\~n}as, Jos{\'e} M},
+  journal={Electronics},
+  volume={7},
+  number={12},
+  pages={430},
+  year={2018},
+  publisher={Multidisciplinary Digital Publishing Institute}
+}
+
+% nvidia jetson
+@misc{jetson,
+  title = {NVIDIA Jetson},
+  author = {NVIDIA Corporation},
+  howpublished = {\url{https://www.nvidia.com/es-es/autonomous-machines/embedded-systems/}},
+  note = {Último acceso: 20-07-2021}
+}
+
+% nvidia cuda
+@misc{cuda,
+  title = {NVIDIA CUDA},
+  author = {NVIDIA Corporation},
+  howpublished = {\url{https://developer.nvidia.com/cuda-zone}},
+  note = {Último acceso: 20-07-2021}
+}
+
+% nvidia jetpack sdk
+@misc{jetpack,
+  title = {NVIDIA JetPack SDK},
+  author = {NVIDIA Corporation},
+  howpublished = {\url{https://developer.nvidia.com/embedded/jetpack}},
+  note = {Último acceso: 20-07-2021}
+}
+
+% victure
+@misc{victure,
+  title = {Govicture},
+  author = {Govicture},
+  howpublished = {\url{https://es.govicture.com/}},
+  note = {Último acceso: 27-12-2021}
+}
+
+% Ubuntu
+@misc{ubuntu,
+  title = {Ubuntu 18.04.3 LTS},
+  author = {Canonical Ltd.},
+  howpublished = {\url{https://ubuntu.com/download/desktop}},
+  note = {Último acceso: 09-02-2020}
+}
+
+% Pyhton
+@misc{python,
+  title = {Pyhton},
+  author = {Python Software Foundation},
+  howpublished = {\url{https://www.python.org/}},
+  note = {Último acceso: 09-02-2020}
+}
+
+% C++
+@misc{cpp,
+  title = {C++},
+  author = {C++},
+  howpublished = {\url{https://www.cplusplus.com/}},
+  note = {Último acceso: 28-12-2021}
+}
+
+% rospy
+@misc{rospy,
+  title = {rospy},
+  author = {Open Source Robotics Foundation, Inc.},
+  howpublished = {\url{http://wiki.ros.org/rospy}},
+  note = {Último acceso: 28-12-2021}
+}
+
+% ros
+@misc{ros,
+  title = {ROS},
+  author = {Open Source Robotics Foundation, Inc},
+  howpublished = {\url{https://www.ros.org/}},
+  note = {Último acceso: 13-07-2021}
+}
+
+% mavros
+@misc{mavros,
+  title = {MAVROS},
+  author = {Open Source Robotics Foundation, Inc.},
+  howpublished = {\url{http://wiki.ros.org/mavros}},
+  note = {Último acceso: 13-07-2021}
+}
+
+% opencv
+@misc{opencv,
+  title = {OpenCV},
+  author = {OpenCV Team},
+  howpublished = {\url{https://opencv.org/}},
+  note = {Último acceso: 19-07-2021}
+}
+
+% Numpy
+@misc{numpy,
+  title = {NumPy},
+  author = {NumPy developers},
+  howpublished = {\url{https://numpy.org/}},
+  note = {Último acceso: 10-02-2020}
+}
+
+%yolo3
+@article{yolov3,
+  title={YOLOv3: An Incremental Improvement},
+  author={Redmon, Joseph and Farhadi, Ali},
+  journal = {arXiv},
+  year={2018}
+}
+
+% yolo4
+@misc{bochkovskiy2020yolov4,
+      title={YOLOv4: Optimal Speed and Accuracy of Object Detection}, 
+      author={Alexey Bochkovskiy and Chien-Yao Wang and Hong-Yuan Mark Liao},
+      year={2020},
+      eprint={2004.10934},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+
+% coco
+@inproceedings{lin2014microsoft,
+  title={Microsoft coco: Common objects in context},
+  author={Lin, Tsung-Yi and Maire, Michael and Belongie, Serge and Hays, James and Perona, Pietro and Ramanan, Deva and Doll{\'a}r, Piotr and Zitnick, C Lawrence},
+  booktitle={European conference on computer vision},
+  pages={740--755},
+  year={2014},
+  organization={Springer}
+}
+
+% jderobot
+@misc{jderobot,
+  title = {JdeRobot},
+  author = {JdeRobot},
+  howpublished = {\url{https://jderobot.github.io/}},
+  note = {Último acceso: 13-07-2021}
+}
+
+% github
+@misc{github,
+  title = {GitHub},
+  author = {GitHub, Inc.},
+  howpublished = {\url{https://github.com/}},
+  note = {Último acceso: 26-02-2020}
+}
+
+% tello sdk
+@misc{tello-sdk,
+  title = {Tello SDK},
+  author = {DJI},
+  howpublished = {\url{https://dl-cdn.ryzerobotics.com/downloads/Tello/Tello\%20SDK\%202.0\%20User\%20Guide.pdf}},
+  note = {Último acceso: 01-01-2022}
+}
+
+% gopipo
+@misc{gopigo,
+  title = {GoPiGo},
+  author = {Dexter Industries},
+  howpublished = {\url{https://www.dexterindustries.com/gopigo3/}},
+  note = {Último acceso: 11-01-2022}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%          INFRAESTRUCTURA              %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%             APLICACIONES              %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@online{IgnitionFuel-OpenRobotics-Standing-person,
+	title={Standing person},
+	organization={Open Robotics},
+	date={2018},
+	month={1},
+	day={6},
+	author={OpenRobotics},
+	url={https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/Standing person},
+}
+
+% tfm nacho
+@misc{tfm-nacho,
+  title = {Embedded solution for person identification and tracking with a robot},
+  author = {Nacho Condés},
+  howpublished = {\url{https://gsyc.urjc.es/jmplaza/students/tfm-deeplearning-person_following-nacho_condes-2020.pdf}},
+  note = {Último acceso: 12-01-2022}
+}
+
+@inproceedings{condes2020embedded,
+  title={Embedded Deep Learning Solution for Person Identification and Following with a Robot},
+  author={Cond{\'e}s, Ignacio and Ca{\~n}as, Jos{\'e}-Mar{\'\i}a and Perdices, Eduardo},
+  booktitle={Workshop of Physical Agents},
+  pages={291--304},
+  year={2020},
+  organization={Springer}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%             CONCLUSIONES              %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Behavior Metrics
+@misc{behavior-metrics,
+  title = {BehaviorMetrics},
+  author = {JdeRobot},
+  howpublished = {\url{https://jderobot.github.io/BehaviorMetrics/}},
+  note = {Último acceso: 09-01-2022}
+}
+
+% Unibotics
+@misc{unibotics,
+  title = {Unibotics},
+  author = {JdeRobot},
+  howpublished = {\url{https://unibotics.org/}},
+  note = {Último acceso: 09-01-2022}
+}
+
+% Los registros deben estar en formato BIBTEX:
+
+% @documenttype{id-referencia,
+%   title={El título del documento},
+%   author={Apellido1, Nombre1 and Apellido2, Nombre2 and Apellido3, Nombre3},
+%   year={AAAA},
+%   publisher={Nombre editorial},
+%}
+
+% Por ejemplo:
+
+% @book{dirac,
+%    title={The Principles of Quantum Mechanics},
+%    author={Paul Adrien Maurice Dirac},
+%    isbn={9780198520115},
+%    series={International series of monographs on physics},
+%    year={1981},
+%    publisher={Clarendon Press},
+%}
+
+% @article{moreno,
+% author={Moreno,Freddy},
+% year={2015},
+% title={El Lorem Ipsum},
+% journal={Salutem Scientia Spiritus},
+% volume={1},
+% number={2},
+% pages={8-8},
+% keywords={Medicine (General); R5-920},
+% }
+
+% La mayoría de bases de datos permiten descargar los registros en formato Bibtex. Te recomendamos que borres o comentes los campos que no deben aparecer en la referencia y que siempre revises la sección de Bibliografía para comprobar que las referencias están bien construidas.
+
+% IMPORTANTE: en Látex hay una serie de caracteres especiales, que son: # $ % & \ ^ _ { } ~. Si aparecen en la bibliografía, tendrás un error al compilar. La mayoría se pueden escapar escribiendo \ delante. Para: \ utiliza \textbackslash ; para ^ \textasciitilde y para ~ \textasciicircum.
+

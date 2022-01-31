@@ -1,0 +1,11 @@
+despegue
+while:
+    obten imagen
+    detecta ``persona''
+    if ``persona'':
+        nuevo error
+        actualiza PIDs
+        cmd velocidad
+    else:
+        busca persona
+land

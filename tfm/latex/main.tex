@@ -1,0 +1,168 @@
+%----------
+%   IMPORTANTE
+%----------
+
+% Esta plantilla está basada en las recomendaciones de la guía "Trabajo fin de Máster: Escribir el TFM", que encontrarás en http://uc3m.libguides.com/TFM/escribir
+% contiene recomendaciones de la Biblioteca basadas principalmente en estilos APA e IEEE, pero debes seguir siempre las orientaciones de tu Tutor de TFM y la normativa de TFM para tu titulación.
+
+
+% ESTA PLANTILLA ESTÁ BASADA EN EL ESTILO IEEE
+
+%----------
+%	CONFIGURACIÓN DEL DOCUMENTO
+%----------
+
+\documentclass[12pt]{report} % fuente a 12pt
+\input{preamble.tex}
+
+%-------------
+%	DOCUMENTO
+%-------------
+
+\begin{document}
+\pagenumbering{roman} % Se utilizan cifras romanas en la numeración de las páginas previas al cuerpo del trabajo
+	
+%----------
+%	PORTADA
+%----------	
+\input{title.tex}
+\clearpage  %página en blanco o de cortesía
+\thispagestyle{empty}
+\mbox{}
+
+%----------
+%	DEDICATORIA
+%----------	
+\clearpage  % pág dch
+\vspace*{\stretch{2}}
+\begin{flushright}
+    \textit{Á miña familia\\ polos seus consellos,\\ que son sempre bos.}
+\end{flushright}
+\vspace*{\stretch{3}}
+\clearpage
+\thispagestyle{empty}
+\mbox{}
+
+%----------
+%	RESUMEN Y PALABRAS CLAVE
+%----------	
+\clearpage  % pág dch
+\renewcommand\abstractname{\large\bfseries\filcenter\uppercase{Resumen}}
+\input{abstract.tex}
+
+\newpage % página en blanco o de cortesía
+\thispagestyle{empty}
+\mbox{}
+
+%----------
+%	AGRADECIMIENTOS
+%----------	
+
+\chapter*{Agradecimientos} % \chapter* evita que aparezca en el índice
+
+\setcounter{page}{5}
+	
+	\input{dedication}
+		
+	\vfill
+	
+	\newpage % página en blanco o de cortesía
+	\thispagestyle{empty}
+	\mbox{}
+	
+%----------
+%	ÍNDICES
+%----------	
+
+%--
+% Índice general
+%-
+\tableofcontents
+\thispagestyle{fancy}
+
+%\newpage % página en blanco o de cortesía
+%\thispagestyle{empty}
+%\mbox{}
+
+%--
+% Índice de figuras. Si no se incluyen, comenta las líneas siguientes
+%-
+\listoffigures
+\thispagestyle{fancy}
+
+%\newpage % página en blanco o de cortesía
+%\thispagestyle{empty}
+%\mbox{}
+
+%--
+% Índice de tablas. Si no se incluyen, comenta las líneas siguientes
+%-
+\listoftables
+\thispagestyle{fancy}
+
+\newpage % página en blanco o de cortesía
+\thispagestyle{empty}
+\mbox{}
+
+%--
+% Índice de codigos. Si no se incluyen, comenta las líneas siguientes
+%-
+\lstlistoflistings
+\thispagestyle{fancy}
+
+\newpage % página en blanco o de cortesía
+\thispagestyle{empty}
+\mbox{}
+
+%-----------
+%   Glosario
+%-----------
+\printglossary[type=\acronymtype, title=\uppercase{Glosario}, style=superheader]
+\thispagestyle{fancy}
+
+%\newpage % página en blanco o de cortesía
+%\thispagestyle{empty}
+%\mbox{}
+
+
+%----------
+%	MEMORIA
+%----------	
+\clearpage
+\pagenumbering{arabic} % numeración con números arábigos para el resto de la memoria.	
+
+\subfile{sections/01-intro} \clearpage
+\subfile{sections/02-herram} \clearpage
+\subfile{sections/03-metodo} \clearpage
+\subfile{sections/04-infra} \clearpage
+\subfile{sections/05-aplic} \clearpage
+\subfile{sections/06-concl} \clearpage
+
+%----------
+%	BIBLIOGRAFÍA
+%----------	
+
+%\nocite{*} % Si quieres que aparezcan en la bibliografía todos los documentos que la componen (también los que no estén citados en el texto) descomenta está línea
+
+\clearpage
+\addcontentsline{toc}{chapter}{Bibliografía}
+% \setquotestyle[english]{british} % Cambiamos el tipo de cita porque en el estilo IEEE se usan las comillas inglesas.
+\printbibliography
+
+
+%----------
+%	ANEXOS
+%----------
+
+% Si tu trabajo incluye anexos, puedes descomentar las siguientes líneas
+%\chapter* {Anexo x}
+%\pagenumbering{gobble} % Las páginas de los anexos no se numeran
+
+
+%------------
+%   GLOSSARY
+%------------
+
+\glsaddall % show all
+
+\end{document}
